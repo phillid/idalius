@@ -1,0 +1,114 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use POE;
+use POE::Kernel;
+use POE::Component::IRC;
+use POE::Component::IRC::Plugin::NickServID;
+use HTTP::Tiny;
+use HTML::HeadParser;
+use Config::Tiny;
+use sb_config;
+
+my %config = sb_config::parse_config('bot.conf');
+
+# New PoCo-IRC object
+my $irc = POE::Component::IRC->spawn(
+	nick => $config{nick},
+	ircname => $config{ircname},
+	server  => $config{server},
+	username => $config{username},
+) or die "Failed to create new PoCo-IRC: $!";
+
+# Plugins
+$irc->plugin_add('NickServID', POE::Component::IRC::Plugin::NickServID->new(
+	Password => $config{password}
+));
+
+POE::Session->create(
+	package_states => [
+		main => [ qw(_default _start irc_001 irc_public irc_msg) ],
+	],
+	heap => { irc => $irc },
+);
+
+our $hold_op = {};
+
+$poe_kernel->run();
+
+sub _start {
+	my $heap = $_[HEAP];
+	my $irc = $heap->{irc};
+	$irc->yield(register => 'all');
+	$irc->yield(connect => { });
+	return;
+}
+
+sub irc_001 {
+	my $sender = $_[SENDER];
+	my $irc = $sender->get_heap();
+
+	print "Connected to server ", $irc->server_name(), "\n";
+
+	$irc->yield( join => $_ ) for @{$config{channels}};
+	return;
+}
+
+sub irc_public {
+	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
+	my $nick = ( split /!/, $who )[0];
+	my $channel = $where->[0];
+
+	print("$channel $who: $what\n");
+
+	# reject ignored nicks first
+	return if (grep {$_ eq $nick} @{$config{ignore}});
+
+	my $me = $irc->nick_name;
+
+	my $saxcount = () = $what =~ /sa+x/gi;
+
+	if ($saxcount > 0) {
+		$irc->yield(privmsg => $channel => "🎷 " x $saxcount);
+	}
+	return;
+}
+
+sub irc_msg {
+	my ($who, $to, $what, $ided) = @_[ARG0, ARG1, ARG2, ARG3];
+	my $nick = (split /!/, $who)[0];
+	if ($ided != 1) {
+		$irc->yield(privmsg => $nick => "You must identify with services");
+		return;
+	}
+	if (!grep {$_ eq $who} @{$config{admins}}) {
+		$irc->yield(privmsg => $nick => "I am bot, go away");
+		return;
+	}
+	if ($what =~ /^say\s/) {
+		my ($channel, $message) = $what =~ /^say\s+(\S+)\s(.*)$/;
+		if ($channel and $message) {
+			$irc->yield(privmsg => $channel => $message);
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: say <channel> <msg>");
+		}
+	}
+	return;
+}
+
+sub _default {
+	my ($event, $args) = @_[ARG0 .. $#_];
+	my @output = ( "$event: " );
+
+	for my $arg (@$args) {
+		if ( ref $arg eq 'ARRAY' ) {
+			push( @output, '[' . join(', ', @$arg ) . ']' );
+		}
+		else {
+			push ( @output, "'$arg'" );
+		}
+	}
+	print join ' ', @output, "\n";
+	return;
+}
