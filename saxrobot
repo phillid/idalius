@@ -6,7 +6,6 @@ use POE;
 use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
-use Config::Tiny;
 use sb_config;
 
 my %config = sb_config::parse_config('bot.conf');
