@@ -6,8 +6,6 @@ use POE;
 use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
-use HTTP::Tiny;
-use HTML::HeadParser;
 use Config::Tiny;
 use sb_config;
 
