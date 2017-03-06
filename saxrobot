@@ -25,7 +25,7 @@ $irc->plugin_add('NickServID', POE::Component::IRC::Plugin::NickServID->new(
 
 POE::Session->create(
 	package_states => [
-		main => [ qw(_default _start irc_001 irc_public irc_msg) ],
+		main => [ qw(_default _start irc_001 irc_kick irc_public irc_msg) ],
 	],
 	heap => { irc => $irc },
 );
@@ -49,6 +49,15 @@ sub irc_001 {
 	print "Connected to server ", $irc->server_name(), "\n";
 
 	$irc->yield( join => $_ ) for @{$config{channels}};
+	return;
+}
+
+sub irc_kick {
+	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
+	if ($kickee eq $config{nick}) {
+		print "I was kicked by $kicker ($reason). Rejoining now.\n";
+		$irc->yield(join => $channel);
+	}
 	return;
 }
 
