@@ -1,0 +1,5 @@
+* CTCP ACTION doesn't trigger the sax-detection
+* auto-rejoin delay
+* auto-rejoin selectivity (on some channels not on others)
+* auto-rejoin on disconnect
+	+ just use the auto-rejoin plugin?
