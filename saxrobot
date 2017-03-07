@@ -92,6 +92,14 @@ sub irc_msg {
 		$irc->yield(privmsg => $nick => "I am bot, go away");
 		return;
 	}
+	if ($what =~ /^nick\s/) {
+		my ($channel) = $what =~ /^nick\s+(\S+)$/;
+		if ($channel) {
+			$irc->yield(nick => $channel);
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: nick <nick>");
+		}
+	}
 	if ($what =~ /^part\s/) {
 		my ($channel) = $what =~ /^part\s+(\S+)$/;
 		if ($channel) {
