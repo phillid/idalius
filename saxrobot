@@ -14,6 +14,7 @@ my %config = sb_config::parse_config('bot.conf');
 my $irc = POE::Component::IRC->spawn(
 	nick => $config{nick},
 	ircname => $config{ircname},
+	port    => $config{port},
 	server  => $config{server},
 	username => $config{username},
 ) or die "Failed to create new PoCo-IRC: $!";
@@ -84,7 +85,7 @@ sub irc_public {
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0, ARG1, ARG2, ARG3];
 	my $nick = (split /!/, $who)[0];
-	if ($ided != 1) {
+	if ($config{must_id} && $ided != 1) {
 		$irc->yield(privmsg => $nick => "You must identify with services");
 		return;
 	}
