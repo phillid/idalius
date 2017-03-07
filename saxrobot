@@ -92,6 +92,22 @@ sub irc_msg {
 		$irc->yield(privmsg => $nick => "I am bot, go away");
 		return;
 	}
+	if ($what =~ /^part\s/) {
+		my ($channel) = $what =~ /^part\s+(\S+)$/;
+		if ($channel) {
+			$irc->yield(part => $channel);
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: part <channel>");
+		}
+	}
+	if ($what =~ /^join\s/) {
+		my ($channel) = $what =~ /^join\s+(\S+)$/;
+		if ($channel) {
+			$irc->yield(join => $channel);
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: join <channel>");
+		}
+	}
 	if ($what =~ /^say\s/) {
 		my ($channel, $message) = $what =~ /^say\s+(\S+)\s(.*)$/;
 		if ($channel and $message) {
