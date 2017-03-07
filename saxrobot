@@ -84,7 +84,7 @@ sub irc_public {
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0, ARG1, ARG2, ARG3];
 	my $nick = (split /!/, $who)[0];
-	if ($ided != 1) {
+	if ($config{must_id} && $ided != 1) {
 		$irc->yield(privmsg => $nick => "You must identify with services");
 		return;
 	}
