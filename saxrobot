@@ -109,7 +109,7 @@ sub irc_msg {
 			my @channels = split /\s+/, $chan_str;
 			$irc->yield(part => @channels => $reason);
 		} else {
-			$irc->yield(privmsg => $nick => "Syntax: part [partmsg]");
+			$irc->yield(privmsg => $nick => "Syntax: part <channel1> [channel2 ...] [partmsg]");
 		}
 	}
 	if ($what =~ /^join\s/) {
