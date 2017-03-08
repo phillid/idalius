@@ -103,14 +103,10 @@ sub irc_msg {
 	}
 	if ($what =~ /^part\s/) {
 		my $message;
-		my ($channel, $message) = $what =~ /^part\s+(\S+)(\s(.*))?$/;
-		if ($channel) {
-			if (!$message) {
-				$message = "commanded by $nick";
-			} else {
-				$message =~ s/^\s+//;
-			}
-			$irc->yield(part => $channel => $message);
+		if ($what =~ /^part(\s+(\S+))+$/m) {
+			my @args = split /\s+/, $what;
+			print for @args;
+			$irc->yield(part => @args);
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: part [partmsg]");
 		}
