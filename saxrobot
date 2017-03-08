@@ -102,11 +102,17 @@ sub irc_msg {
 		}
 	}
 	if ($what =~ /^part\s/) {
-		my ($channel) = $what =~ /^part\s+(\S+)$/;
+		my $message;
+		my ($channel, $message) = $what =~ /^part\s+(\S+)(\s(.*))?$/;
 		if ($channel) {
-			$irc->yield(part => $channel);
+			if (!$message) {
+				$message = "commanded by $nick";
+			} else {
+				$message =~ s/^\s+//;
+			}
+			$irc->yield(part => $channel => $message);
 		} else {
-			$irc->yield(privmsg => $nick => "Syntax: part <channel>");
+			$irc->yield(privmsg => $nick => "Syntax: part [partmsg]");
 		}
 	}
 	if ($what =~ /^join\s/) {
