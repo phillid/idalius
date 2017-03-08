@@ -104,9 +104,10 @@ sub irc_msg {
 	if ($what =~ /^part\s/) {
 		my $message;
 		if ($what =~ /^part(\s+(\S+))+$/m) {
-			my @args = split /\s+/, $what;
-			print for @args;
-			$irc->yield(part => @args);
+			$what =~ s/^part\s+//;
+			my ($chan_str, $reason) = split /\s+(?!#)/, $what, 2;
+			my @channels = split /\s+/, $chan_str;
+			$irc->yield(part => @channels => $reason);
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: part [partmsg]");
 		}
