@@ -31,8 +31,6 @@ POE::Session->create(
 	heap => { irc => $irc },
 );
 
-our $hold_op = {};
-
 $poe_kernel->run();
 
 sub _start {
@@ -83,7 +81,7 @@ sub irc_public {
 }
 
 sub irc_msg {
-	my ($who, $to, $what, $ided) = @_[ARG0, ARG1, ARG2, ARG3];
+	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
 	if ($config{must_id} && $ided != 1) {
 		$irc->yield(privmsg => $nick => "You must identify with services");
