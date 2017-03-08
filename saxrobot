@@ -30,8 +30,6 @@ POE::Session->create(
 	heap => { irc => $irc },
 );
 
-our $hold_op = {};
-
 $poe_kernel->run();
 
 sub _start {
