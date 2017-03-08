@@ -113,11 +113,12 @@ sub irc_msg {
 		}
 	}
 	if ($what =~ /^join\s/) {
-		my ($channel) = $what =~ /^join\s+(\S+)$/;
-		if ($channel) {
-			$irc->yield(join => $channel);
+		if ($what =~ /^join(\s+(\S+))+$/) {
+			$what =~ s/^join\s+//;
+			my @channels = split /\s+/, $what;
+			$irc->yield(join => $_) for @channels;
 		} else {
-			$irc->yield(privmsg => $nick => "Syntax: join <channel>");
+			$irc->yield(privmsg => $nick => "Syntax: join <channel1> [channel2 ...]");
 		}
 	}
 	if ($what =~ /^say\s/) {
