@@ -3,3 +3,4 @@
 * auto-rejoin selectivity (on some channels not on others)
 * auto-rejoin on disconnect
 	+ just use the auto-rejoin plugin?
+* add admin commands to README.md
