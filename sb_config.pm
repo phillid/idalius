@@ -9,7 +9,7 @@ use Config::Tiny;
 sub parse_config
 {
 	my @scalar_configs = ('nick', 'username', 'ircname', 'server', 'port', 'password', 'must_id');
-	my @list_configs = ('channels', 'ignore', 'admins');
+	my @list_configs = ('channels', 'ignore', 'admins', 're', 'rep' );
 	my $file = $_[0];
 	my %built_config;
 	my $config = Config::Tiny->read($file);
