@@ -88,6 +88,17 @@ sub irc_public {
 	if ($saxcount > 0) {
 		$irc->yield(privmsg => $channel => "🎷 " x $saxcount);
 	}
+
+	my $idx = 0;
+	for (@{$config{re}}) {
+		my $repcount = () = $what =~ /@{$config{re}}[$idx]/gi;
+		if ($repcount > 0) {
+		if ($repcount > 0) {
+			$irc->yield(privmsg => $channel => @{$config{rep}}[$idx] x $repcount);
+		}
+		$idx++;
+	}
+
 	return;
 }
 
