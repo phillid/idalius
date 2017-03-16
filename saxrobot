@@ -83,12 +83,7 @@ sub irc_public {
 
 	my $me = $irc->nick_name;
 
-	my $saxcount = () = $what =~ /sa+x/gi;
-
-	if ($saxcount > 0) {
-		$irc->yield(privmsg => $channel => "🎷 " x $saxcount);
-	}
-
+	# FIXME tidy this loop: do we need $idx?
 	my $idx = 0;
 	for (@{$config{re}}) {
 		my $repcount = () = $what =~ /@{$config{re}}[$idx]/gi;
