@@ -84,17 +84,12 @@ sub irc_public {
 	my $me = $irc->nick_name;
 
 	my $collected_response = "";
-	for (@{$config{triggers}}) {
-		my ($match, $response) = split /=>/;
-		# strip quotes
-		$match =~ s/^[^']*'|'[^']*$//g;
-		$response =~ s/^[^']*'|'[^']*$//g;
-
-		# do the count
-		my $repcount = () = $what =~ /$match/gi;
-		if ($repcount > 0) {
-			$collected_response .= $response x $repcount;
-		}
+	print $config{triggers};
+	my @k = (keys %{$config{triggers}});
+	my $expression = join '|', @k;
+	print "expression: $expression\n";
+	while ($what =~ /($expression)/g) {
+		$collected_response .= $config{triggers}->{$1};
 	}
 	$irc->yield(privmsg => $channel => $collected_response) if $collected_response;
 
