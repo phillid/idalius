@@ -7,4 +7,4 @@ ignore   = trumpetbot,abusiveuser
 password = pleffquiffle
 admins   = snargle!~kleg@glarg.example.com
 must_id  = 1
-triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'lenny' => '( ͡° ͜ ʖ ͡° ) '
+triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
