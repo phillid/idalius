@@ -85,11 +85,19 @@ sub irc_public {
 
 	my $collected_response = "";
 	print $config{triggers};
-	my @k = (keys %{$config{triggers}});
-	my $expression = join '|', @k;
-	print "expression: $expression\n";
+	my @expressions = (keys %{$config{triggers}});
+	my $expression = join '|', @expressions;
 	while ($what =~ /($expression)/g) {
-		$collected_response .= $config{triggers}->{$1};
+		my $matched = $1;
+		my $key;
+		# figure out which key matched
+		foreach (@expressions) {
+			if ($matched =~ /$_/) {
+				$key = $_;
+				last;
+			}
+		}
+		$collected_response .= $config{triggers}->{$key};
 	}
 	$irc->yield(privmsg => $channel => $collected_response) if $collected_response;
 
