@@ -83,15 +83,20 @@ sub irc_public {
 
 	my $me = $irc->nick_name;
 
-	# FIXME tidy this loop: do we need $idx?
-	my $idx = 0;
-	for (@{$config{re}}) {
-		my $repcount = () = $what =~ /@{$config{re}}[$idx]/gi;
+	my $collected_response = "";
+	for (@{$config{triggers}}) {
+		my ($match, $response) = split /=>/;
+		# strip quotes
+		$match =~ s/^[^']*'|'[^']*$//g;
+		$response =~ s/^[^']*'|'[^']*$//g;
+
+		# do the count
+		my $repcount = () = $what =~ /$match/gi;
 		if ($repcount > 0) {
-			$irc->yield(privmsg => $channel => @{$config{rep}}[$idx] x $repcount);
+			$collected_response .= $response x $repcount;
 		}
-		$idx++;
 	}
+	$irc->yield(privmsg => $channel => $collected_response) if $collected_response;
 
 	return;
 }
