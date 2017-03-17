@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use POSIX qw(setuid setgid);
 use POE;
 use POE::Kernel;
 use POE::Component::IRC;
@@ -33,7 +34,14 @@ POE::Session->create(
 	heap => { irc => $irc },
 );
 
+drop_priv();
+
 $poe_kernel->run();
+
+sub drop_priv {
+	setgid($config{gid}) or die "Failed to setgid: $!\n";
+	setuid($config{uid}) or die "Failed to setuid: $!\n";
+}
 
 sub _start {
 	my $heap = $_[HEAP];

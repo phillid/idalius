@@ -8,7 +8,7 @@ use Config::Tiny;
 
 sub parse_config
 {
-	my @scalar_configs = ('nick', 'username', 'ircname', 'server', 'port', 'password', 'must_id');
+	my @scalar_configs = ('nick', 'username', 'ircname', 'server', 'port', 'password', 'must_id', 'user', 'group');
 	my @list_configs = ('channels', 'ignore', 'admins');
 	my $file = $_[0];
 	my %built_config;
@@ -34,6 +34,12 @@ sub parse_config
 		$response =~ s/^[^']*'|'[^']*$//g;
 		$triggers{$match} = $response;
 	}
+
+	$built_config{uid} = getpwnam($built_config{user})
+		or die "Cannot get uid of $built_config{user}: $!\n";
+	$built_config{gid} = getgrnam($built_config{group})
+		or die "Cannot get gid of $built_config{group}: $!\n";
+
 
 	$built_config{triggers} = \%triggers;
 
