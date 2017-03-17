@@ -84,15 +84,14 @@ sub irc_public {
 	my $me = $irc->nick_name;
 
 	my $collected_response = "";
-	print $config{triggers};
 	my @expressions = (keys %{$config{triggers}});
 	my $expression = join '|', @expressions;
-	while ($what =~ /($expression)/g) {
+	while ($what =~ /($expression)/gi) {
 		my $matched = $1;
 		my $key;
 		# figure out which key matched
 		foreach (@expressions) {
-			if ($matched =~ /$_/) {
+			if ($matched =~ /$_/i) {
 				$key = $_;
 				last;
 			}
