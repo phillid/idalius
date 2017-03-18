@@ -15,6 +15,7 @@ my $current_nick = $config{nick};
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
+	UseSSL => $config{usessl},
 	nick => $config{nick},
 	ircname => $config{ircname},
 	port    => $config{port},
