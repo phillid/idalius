@@ -30,7 +30,7 @@ $irc->plugin_add('NickServID', POE::Component::IRC::Plugin::NickServID->new(
 
 POE::Session->create(
 	package_states => [
-		main => [ qw(_default _start irc_001 irc_kick irc_public irc_msg irc_nick) ],
+		main => [ qw(_default _start irc_001 irc_kick irc_ctcp_action irc_public irc_msg irc_nick) ],
 	],
 	heap => { irc => $irc },
 );
@@ -78,6 +78,10 @@ sub irc_kick {
 		$irc->yield(join => $channel);
 	}
 	return;
+}
+
+sub irc_ctcp_action {
+	irc_public(@_);
 }
 
 sub irc_public {
