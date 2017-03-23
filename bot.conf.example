@@ -9,6 +9,7 @@ ignore   = trumpetbot,abusiveuser
 password = pleffquiffle
 admins   = snargle!~kleg@glarg.example.com
 must_id  = 1
+quit_msg = "Goodbye!"
 user     = nobody
 group    = nobody
 triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '

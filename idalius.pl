@@ -30,7 +30,7 @@ $irc->plugin_add('NickServID', POE::Component::IRC::Plugin::NickServID->new(
 
 POE::Session->create(
 	package_states => [
-		main => [ qw(_default _start irc_001 irc_kick irc_ctcp_action irc_public irc_msg irc_nick) ],
+		main => [ qw(_default _start irc_001 irc_kick irc_ctcp_action irc_public irc_msg irc_nick irc_disconnected ) ],
 	],
 	heap => { irc => $irc },
 );
@@ -163,7 +163,18 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Syntax: say <channel> <msg>");
 		}
 	}
+	if ($what =~ /^reconnect/) {
+		my ($reason) = $what =~ /^reconnect\s+(.+)$/;
+		if (!$reason) {
+			$reason = $config{quit_msg};
+		}
+		$irc->yield(quit => $reason);
+	}
 	return;
+}
+
+sub irc_disconnected {
+	$irc->yield(connect => { });
 }
 
 sub _default {
