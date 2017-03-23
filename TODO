@@ -3,3 +3,6 @@
 * auto-rejoin on disconnect
 	+ just use the auto-rejoin plugin?
 * add admin commands to README.md
+* add more admin commands for e.g.
+	+ adding stuff on the fly
+	+ restarting the bot
