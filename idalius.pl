@@ -9,7 +9,8 @@ use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use sb_config;
 
-my %config = sb_config::parse_config('bot.conf');
+my $config_file = "bot.conf";
+my %config = sb_config::parse_config($config_file);
 
 my $current_nick = $config{nick};
 
@@ -174,6 +175,7 @@ sub irc_msg {
 }
 
 sub irc_disconnected {
+	%config = sb_config::parse_config($config_file);
 	$irc->yield(connect => { });
 }
 
