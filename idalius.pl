@@ -25,9 +25,11 @@ my $irc = POE::Component::IRC->spawn(
 ) or die "Failed to create new PoCo-IRC: $!";
 
 # Plugins
-$irc->plugin_add('NickServID', POE::Component::IRC::Plugin::NickServID->new(
-	Password => $config{password}
-));
+$config{password} and $irc->plugin_add(
+	'NickServID',
+	POE::Component::IRC::Plugin::NickServID->new(
+		Password => $config{password}
+	));
 
 POE::Session->create(
 	package_states => [

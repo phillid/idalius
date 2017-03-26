@@ -10,12 +10,17 @@ sub parse_config
 {
 	my @scalar_configs = ('nick', 'username', 'ircname', 'server', 'port', 'usessl', 'password', 'must_id', 'quit_msg', 'user', 'group');
 	my @list_configs = ('channels', 'ignore', 'admins');
+	my @optional_configs = ('password');
 	my $file = $_[0];
 	my %built_config;
 	my $config = Config::Tiny->read($file);
 
 	# FIXME catch undefined/missing config options
 	foreach my $option (@scalar_configs) {
+		my $value = $config->{_}->{$option};
+		if (! defined $value && ! grep {$_ eq $option} @optional_configs) {
+			die "Option \"$option\" must be set in $file\n";
+		}
 		$built_config{$option} = $config->{_}->{$option};
 	}
 
