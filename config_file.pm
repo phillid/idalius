@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package sb_config;
+package config_file;
 
 use strict;
 use warnings;
