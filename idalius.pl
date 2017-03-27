@@ -33,7 +33,16 @@ $config{password} and $irc->plugin_add(
 
 POE::Session->create(
 	package_states => [
-		main => [ qw(_default _start irc_001 irc_kick irc_ctcp_action irc_public irc_msg irc_nick irc_disconnected ) ],
+		main => [ qw(
+			_default
+			_start
+			irc_001
+			irc_kick
+			irc_ctcp_action
+			irc_public
+			irc_msg
+			irc_nick
+			irc_disconnected ) ],
 	],
 	heap => { irc => $irc },
 );
@@ -99,7 +108,7 @@ sub irc_public {
 
 	my $me = $irc->nick_name;
 
-	my $collected_response = "";
+	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});
 	my $expression = join '|', @expressions;
 	while ($what =~ /($expression)/gi) {
@@ -112,9 +121,9 @@ sub irc_public {
 				last;
 			}
 		}
-		$collected_response .= $config{triggers}->{$key};
+		$gathered .= $config{triggers}->{$key};
 	}
-	$irc->yield(privmsg => $channel => $collected_response) if $collected_response;
+	$irc->yield(privmsg => $channel => $gathered) if $gathered;
 
 	return;
 }
@@ -146,7 +155,8 @@ sub irc_msg {
 			my @channels = split /\s+/, $chan_str;
 			$irc->yield(part => @channels => $reason);
 		} else {
-			$irc->yield(privmsg => $nick => "Syntax: part <channel1> [channel2 ...] [partmsg]");
+			$irc->yield(privmsg => $nick =>
+			            "Syntax: part <channel1> [channel2 ...] [partmsg]");
 		}
 	}
 	if ($what =~ /^join\s/) {
@@ -155,7 +165,8 @@ sub irc_msg {
 			my @channels = split /\s+/, $what;
 			$irc->yield(join => $_) for @channels;
 		} else {
-			$irc->yield(privmsg => $nick => "Syntax: join <channel1> [channel2 ...]");
+			$irc->yield(privmsg => $nick =>
+			            "Syntax: join <channel1> [channel2 ...]");
 		}
 	}
 	if ($what =~ /^say\s/) {

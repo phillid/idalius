@@ -8,9 +8,24 @@ use Config::Tiny;
 
 sub parse_config
 {
-	my @scalar_configs = ('nick', 'username', 'ircname', 'server', 'port', 'usessl', 'password', 'must_id', 'quit_msg', 'user', 'group');
-	my @list_configs = ('channels', 'ignore', 'admins');
-	my @optional_configs = ('password');
+	my @scalar_configs = (
+		'nick',
+		'username',
+		'ircname',
+		'server',
+		'port',
+		'usessl',
+		'password',
+		'must_id',
+		'quit_msg',
+		'user',
+		'group');
+	my @list_configs = (
+		'channels',
+		'ignore',
+		'admins');
+	my @optional_configs = (
+		'password');
 	my $file = $_[0];
 	my %built_config;
 	my $config = Config::Tiny->read($file);
