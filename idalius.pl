@@ -18,6 +18,8 @@ $| = 1;
 
 my $current_nick = $config{nick};
 
+# Hack: coerce into numeric type
++$config{url_on};
 +$config{url_len};
 
 # New PoCo-IRC object
@@ -60,6 +62,42 @@ $poe_kernel->run();
 sub drop_priv {
 	setgid($config{gid}) or die "Failed to setgid: $!\n";
 	setuid($config{uid}) or die "Failed to setuid: $!\n";
+}
+
+sub url_get_title
+{
+	my $url = $_[0];
+	my $response = HTTP::Tiny->new((timeout => 5))->head($url);
+	if (!$response->{success}) {
+		print "Something broke: $response->{content}\n";
+		return;
+	}
+
+	if (!$response->{headers}->{"content-type"} =~ m,text/html ?,) {
+		print("Not html, giving up now");
+		return;
+	}
+
+	$response = HTTP::Tiny->new((timeout => 5))->get($url);
+	if (!$response->{success}) {
+		print "Something broke: $response->{content}\n";
+		return;
+	}
+
+	my $html = $response->{content};
+
+	my $parser = HTML::HeadParser->new;
+	$parser->parse($html);
+
+	# get title and unpack from utf8 (assumption)
+	my $title = $parser->header("title");
+	return unless $title;
+
+	my $shorturl = $url;
+	$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
+
+	my $composed_title = "$title ($shorturl)";
+	return $composed_title;
 }
 
 sub _start {
@@ -114,43 +152,12 @@ sub irc_public {
 
 	my $me = $irc->nick_name;
 
-	# Parse urls in all other regular messages
-	if ($what =~ /(https?:\/\/[^ ]+)/i)
+	if ($config{url_on} and $what =~ /(https?:\/\/[^ ]+)/i)
 	{
-		my $url = $1;
-		my $response = HTTP::Tiny->new((timeout => 5))->head($url);
-		if (!$response->{success}) {
-			print "Something broke: $response->{content}\n";
-			return;
-		}
-
-		if (!$response->{headers}->{"content-type"} =~ m,text/html ?,) {
-			print("Not html, giving up now");
-			return;
-		}
-	
-		$response = HTTP::Tiny->new((timeout => 5))->get($url);
-		if (!$response->{success}) {
-			print "Something broke: $response->{content}\n";
-			return;
-		}
-
-		my $html = $response->{content};
-
-		my $parser = HTML::HeadParser->new;
-		$parser->parse($html);
-
-		# get title and unpack from utf8 (assumption)
-		my $title = $parser->header("title");
-		return unless $title;
-
-		my $shorturl = $url;
-		$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
-
-		print "Title: $title ($url)\n";
-		$irc->yield(privmsg => $channel => "$title ($shorturl)");
+		my $title = url_get_title($1);
+		print "Title: $title\n";
+		$irc->yield(privmsg => $channel => $title);
 	}
-
 
 	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});

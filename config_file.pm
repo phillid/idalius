@@ -19,7 +19,9 @@ sub parse_config
 		'must_id',
 		'quit_msg',
 		'user',
-		'group');
+		'group',
+		'url_on',
+		'url_len');
 	my @list_configs = (
 		'channels',
 		'ignore',
