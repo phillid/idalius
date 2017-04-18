@@ -96,6 +96,9 @@ sub url_get_title
 	my $shorturl = $url;
 	$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
 
+	# remove http(s):// to avoid triggering other poorly configured bots
+	$shorturl =~ s,^https?://,,g;
+
 	my $composed_title = "$title ($shorturl)";
 	return $composed_title;
 }
