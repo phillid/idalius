@@ -12,6 +12,8 @@ use config_file;
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
 
+$| = 1;
+
 my $current_nick = $config{nick};
 
 # New PoCo-IRC object
