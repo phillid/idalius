@@ -8,6 +8,8 @@ use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use config_file;
+use HTTP::Tiny;
+use HTML::HeadParser;
 
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
@@ -15,6 +17,8 @@ my %config = config_file::parse_config($config_file);
 $| = 1;
 
 my $current_nick = $config{nick};
+
++$config{url_len};
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -109,6 +113,44 @@ sub irc_public {
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
 	my $me = $irc->nick_name;
+
+	# Parse urls in all other regular messages
+	if ($what =~ /(https?:\/\/[^ ]+)/i)
+	{
+		my $url = $1;
+		my $response = HTTP::Tiny->new((timeout => 5))->head($url);
+		if (!$response->{success}) {
+			print "Something broke: $response->{content}\n";
+			return;
+		}
+
+		if (!$response->{headers}->{"content-type"} =~ m,text/html ?,) {
+			print("Not html, giving up now");
+			return;
+		}
+	
+		$response = HTTP::Tiny->new((timeout => 5))->get($url);
+		if (!$response->{success}) {
+			print "Something broke: $response->{content}\n";
+			return;
+		}
+
+		my $html = $response->{content};
+
+		my $parser = HTML::HeadParser->new;
+		$parser->parse($html);
+
+		# get title and unpack from utf8 (assumption)
+		my $title = $parser->header("title");
+		return unless $title;
+
+		my $shorturl = $url;
+		$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
+
+		print "Title: $title ($url)\n";
+		$irc->yield(privmsg => $channel => "$title ($shorturl)");
+	}
+
 
 	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});
