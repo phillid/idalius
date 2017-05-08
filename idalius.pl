@@ -72,7 +72,7 @@ sub url_get_title
 	my $response = $http->get($url);
 
 	if (!$response->{success}) {
-		print "Something broke: $response->{content}\n";
+		print "Something broke: $response->{reason}\n";
 		return;
 	}
 
