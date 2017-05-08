@@ -67,20 +67,17 @@ sub drop_priv {
 sub url_get_title
 {
 	my $url = $_[0];
-	my $response = HTTP::Tiny->new((timeout => 5))->head($url);
+	my $http = HTTP::Tiny->new((default_headers => {accept => 'text/html'}, timeout => 5, agent => "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"));
+
+	my $response = $http->get($url);
+
 	if (!$response->{success}) {
 		print "Something broke: $response->{content}\n";
 		return;
 	}
 
-	if (!$response->{headers}->{"content-type"} =~ m,text/html ?,) {
-		print("Not html, giving up now");
-		return;
-	}
-
-	$response = HTTP::Tiny->new((timeout => 5))->get($url);
-	if (!$response->{success}) {
-		print "Something broke: $response->{content}\n";
+	if (!($response->{headers}->{"content-type"} =~ m,text/html ?,)) {
+		print("Not html, giving up now\n");
 		return;
 	}
 
@@ -158,8 +155,10 @@ sub irc_public {
 	if ($config{url_on} and $what =~ /(https?:\/\/[^ ]+)/i)
 	{
 		my $title = url_get_title($1);
-		print "Title: $title\n";
-		$irc->yield(privmsg => $channel => $title);
+		if ($title) {
+			print "Title: $title\n";
+			$irc->yield(privmsg => $channel => $title);
+		}
 	}
 
 	my $gathered = "";
