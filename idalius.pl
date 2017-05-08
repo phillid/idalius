@@ -95,6 +95,7 @@ sub url_get_title
 
 	# remove http(s):// to avoid triggering other poorly configured bots
 	$shorturl =~ s,^https?://,,g;
+	$shorturl =~ s,/$,,g;
 
 	my $composed_title = "$title ($shorturl)";
 	return $composed_title;
