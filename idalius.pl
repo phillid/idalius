@@ -136,9 +136,9 @@ sub irc_msg {
 		return;
 	}
 	if ($what =~ /^nick\s/) {
-		my ($channel) = $what =~ /^nick\s+(\S+)$/;
-		if ($channel) {
-			$irc->yield(nick => $channel);
+		my ($newnick) = $what =~ /^nick\s+(\S+)$/;
+		if ($newnick) {
+			$irc->yield(nick => $newnick);
 			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: nick <nick>");
