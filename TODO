@@ -1,5 +1,10 @@
+* add section to config file for each module
+	+ allow whitelisting and blacklisting under each module, per-channel
+	  e.g. "use url_title everywhere except channel ##bar where a bot already
+	  provides this"
 * auto-rejoin delay
 * auto-rejoin selectivity (on some channels not on others)
 * add admin commands to README.md
 * add more admin commands for e.g.
 	+ adding stuff on the fly
+	+ reloading modules, or changing channel blacklists/whitelists
