@@ -8,8 +8,7 @@ use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use config_file;
-use HTTP::Tiny;
-use HTML::HeadParser;
+use Module::Pluggable search_path => "plugin", instantiate => 'configure';
 
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
@@ -21,6 +20,8 @@ my $current_nick = $config{nick};
 # Hack: coerce into numeric type
 +$config{url_on};
 +$config{url_len};
+
+my @plugin_list = plugins("dummy", \%config);
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -62,43 +63,6 @@ $poe_kernel->run();
 sub drop_priv {
 	setgid($config{gid}) or die "Failed to setgid: $!\n";
 	setuid($config{uid}) or die "Failed to setuid: $!\n";
-}
-
-sub url_get_title
-{
-	my $url = $_[0];
-	my $http = HTTP::Tiny->new((default_headers => {accept => 'text/html'}, timeout => 5, agent => "Mozilla/5.0 (X11; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0"));
-
-	my $response = $http->get($url);
-
-	if (!$response->{success}) {
-		print "Something broke: $response->{reason}\n";
-		return;
-	}
-
-	if (!($response->{headers}->{"content-type"} =~ m,text/html ?,)) {
-		print("Not html, giving up now\n");
-		return;
-	}
-
-	my $html = $response->{content};
-
-	my $parser = HTML::HeadParser->new;
-	$parser->parse($html);
-
-	# get title and unpack from utf8 (assumption)
-	my $title = $parser->header("title");
-	return unless $title;
-
-	my $shorturl = $url;
-	$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
-
-	# remove http(s):// to avoid triggering other poorly configured bots
-	$shorturl =~ s,^https?://,,g;
-	$shorturl =~ s,/$,,g;
-
-	my $composed_title = "$title ($shorturl)";
-	return $composed_title;
 }
 
 sub _start {
@@ -151,33 +115,11 @@ sub irc_public {
 	# reject ignored nicks first
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
-	my $me = $irc->nick_name;
-
-	if ($config{url_on} and $what =~ /(https?:\/\/[^ ]+)/i)
-	{
-		my $title = url_get_title($1);
-		if ($title) {
-			print "Title: $title\n";
-			$irc->yield(privmsg => $channel => $title);
-		}
+	for my $module (@plugin_list) {
+		print "Module $module";
+		my $output = $module->message($irc->nick_name, $who, $where, $what);
+		$irc->yield(privmsg => $where => $output) if $output;
 	}
-
-	my $gathered = "";
-	my @expressions = (keys %{$config{triggers}});
-	my $expression = join '|', @expressions;
-	while ($what =~ /($expression)/gi) {
-		my $matched = $1;
-		my $key;
-		# figure out which key matched
-		foreach (@expressions) {
-			if ($matched =~ /$_/i) {
-				$key = $_;
-				last;
-			}
-		}
-		$gathered .= $config{triggers}->{$key};
-	}
-	$irc->yield(privmsg => $channel => $gathered) if $gathered;
 
 	return;
 }
