@@ -139,6 +139,7 @@ sub irc_msg {
 		my ($channel) = $what =~ /^nick\s+(\S+)$/;
 		if ($channel) {
 			$irc->yield(nick => $channel);
+			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: nick <nick>");
 		}
@@ -150,6 +151,7 @@ sub irc_msg {
 			my ($chan_str, $reason) = split /\s+(?!#)/, $what, 2;
 			my @channels = split /\s+/, $chan_str;
 			$irc->yield(part => @channels => $reason);
+			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick =>
 			            "Syntax: part <channel1> [channel2 ...] [partmsg]");
@@ -160,6 +162,7 @@ sub irc_msg {
 			$what =~ s/^join\s+//;
 			my @channels = split /\s+/, $what;
 			$irc->yield(join => $_) for @channels;
+			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick =>
 			            "Syntax: join <channel1> [channel2 ...]");
@@ -169,12 +172,14 @@ sub irc_msg {
 		my ($channel, $message) = $what =~ /^say\s+(\S+)\s(.*)$/;
 		if ($channel and $message) {
 			$irc->yield(privmsg => $channel => $message);
+			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: say <channel> <msg>");
 		}
 	}
 	if ($what =~ /^reconnect/) {
 		my ($reason) = $what =~ /^reconnect\s+(.+)$/;
+		$irc->yield(privmsg => $nick => "Doing that now");
 		if (!$reason) {
 			$reason = $config{quit_msg};
 		}
