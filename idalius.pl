@@ -116,7 +116,6 @@ sub irc_public {
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
 	for my $module (@plugin_list) {
-		print "Module $module";
 		my $output = $module->message($irc->nick_name, $who, $where, $what);
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
