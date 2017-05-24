@@ -26,7 +26,7 @@ sub message
 	}
 	return unless $url;
 
-	my $http = HTTP::Tiny->new((default_headers => {accept => 'text/html'}, timeout => 5));
+	my $http = HTTP::Tiny->new((default_headers => {range => "bytes 0-65536", accept => 'text/html'}, timeout => 5));
 
 	my $response = $http->get($url);
 
