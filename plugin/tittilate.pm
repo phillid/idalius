@@ -4,6 +4,7 @@ package plugin::tittilate;
 
 use strict;
 use warnings;
+use IRC::Utils qw(strip_color strip_formatting);
 
 my %config;
 
@@ -16,6 +17,7 @@ sub configure {
 
 sub message {
 	my ($self, $me, $who, $where, $what) = @_;
+	$what = strip_color(strip_formatting($what));
 	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});
 	my $expression = join '|', @expressions;
