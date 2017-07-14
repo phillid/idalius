@@ -8,6 +8,7 @@ use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use config_file;
+use IRC::Utils qw(strip_color strip_formatting);
 use Module::Pluggable search_path => "plugin", instantiate => 'configure';
 
 my $config_file = "bot.conf";
@@ -116,7 +117,8 @@ sub irc_public {
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
 	for my $module (@plugin_list) {
-		my $output = $module->message($irc->nick_name, $who, $where, $what);
+		my $stripped_what = strip_color(strip_formatting($what));
+		my $output = $module->message($irc->nick_name, $who, $where, $what, $stripped_what);
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
 

@@ -6,7 +6,6 @@ use strict;
 use warnings;
 use HTTP::Tiny;
 use HTML::HeadParser;
-use IRC::Utils qw(strip_color strip_formatting);
 
 my %config;
 
@@ -19,10 +18,8 @@ sub configure {
 
 sub message
 {
-	my ($self, $me, $who, $where, $what) = @_;
+	my ($self, $me, $who, $where, $raw_what, $what) = @_;
 	my $url;
-
-	$what = strip_color(strip_formatting($what));
 
 	if ($what =~ /(https?:\/\/[^ ]+)/i) {
 		$url = $1;
