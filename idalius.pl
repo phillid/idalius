@@ -52,7 +52,9 @@ POE::Session->create(
 			irc_public
 			irc_msg
 			irc_nick
-			irc_disconnected ) ],
+			irc_disconnected
+			irc_error
+			irc_socketerr) ],
 	],
 	heap => { irc => $irc },
 );
@@ -191,6 +193,14 @@ sub irc_msg {
 
 sub irc_disconnected {
 	%config = config_file::parse_config($config_file);
+	$irc->yield(connect => { });
+}
+
+sub irc_error {
+	$irc->yield(connect => { });
+}
+
+sub irc_socketerr {
 	$irc->yield(connect => { });
 }
 
