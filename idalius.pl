@@ -153,6 +153,7 @@ sub irc_msg {
 			$what =~ s/^part\s+//;
 			my ($chan_str, $reason) = split /\s+(?!#)/, $what, 2;
 			my @channels = split /\s+/, $chan_str;
+			$reason = "Commanded by $nick" unless $reason;
 			$irc->yield(part => @channels => $reason);
 			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
