@@ -113,7 +113,7 @@ sub irc_public {
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
 
-	print("$channel $who: $what\n");
+	print("[$channel] $who: $what\n");
 
 	# reject ignored nicks first
 	return if (grep {$_ eq $nick} @{$config{ignore}});
