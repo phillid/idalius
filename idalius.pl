@@ -51,6 +51,7 @@ POE::Session->create(
 			irc_ctcp_action
 			irc_public
 			irc_msg
+			irc_invite
 			irc_nick
 			irc_disconnected
 			irc_error
@@ -190,6 +191,11 @@ sub irc_msg {
 		$irc->yield(quit => $reason);
 	}
 	return;
+}
+
+sub irc_invite {
+	my ($who, $where) = @_[ARG0 .. ARG1];
+	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config{channels}});
 }
 
 sub irc_disconnected {
