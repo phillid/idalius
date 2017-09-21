@@ -192,6 +192,16 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Syntax: action <channel> <action text>");
 		}
 	}
+	if ($what =~ /^kick\s/) {
+		my ($channel, $kickee, undef, $reason) = $what =~ /^kick\s+(\S+)\s(\S+)((?:\s)(.*))?$/;
+		if ($channel and $kickee) {
+			$reason = "Requested by $nick" unless $reason;
+			$irc->yield(kick => $channel => $kickee => $reason);
+			$irc->yield(privmsg => $nick => "Requested.");
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: kick <channel> <nick> [reason]");
+		}
+	}
 	if ($what =~ /^reconnect/) {
 		my ($reason) = $what =~ /^reconnect\s+(.+)$/;
 		$irc->yield(privmsg => $nick => "Doing that now");
