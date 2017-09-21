@@ -139,6 +139,7 @@ sub irc_msg {
 		$irc->yield(privmsg => $nick => "I am bot, go away");
 		return;
 	}
+	# FIXME this needs tidying. Some of this can be factored out, surely.
 	if ($what =~ /^nick\s/) {
 		my ($newnick) = $what =~ /^nick\s+(\S+)$/;
 		if ($newnick) {
@@ -180,6 +181,15 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Requested.");
 		} else {
 			$irc->yield(privmsg => $nick => "Syntax: say <channel> <msg>");
+		}
+	}
+	if ($what =~ /^action\s/) {
+		my ($channel, $action) = $what =~ /^action\s+(\S+)\s(.*)$/;
+		if ($channel and $action) {
+			$irc->yield(ctcp => $channel => "ACTION $action");
+			$irc->yield(privmsg => $nick => "Requested.");
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: action <channel> <action text>");
 		}
 	}
 	if ($what =~ /^reconnect/) {
