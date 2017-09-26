@@ -7,9 +7,8 @@ bot's functionality is mostly configurable and extensible.
 ## Module: URL Title
 
 idalius can pick a URL out of any channel message and respond in-channel with
-the title of the link, followed by the domain name (really just the bit in
-between the first `//` and the first `/` in brackets, so you know roughly what
-link the title is for, without being overly verbose.
+the title of the link, followed by the hostname so you know roughly what link
+the title is for.
 
 	<phillid> Testing the URL title thingy https://sighup.nz/ and presuming it works
 	<idalius> Ahoy-hoy ☃ SIGHUP (sighup.nz)
