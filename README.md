@@ -1,12 +1,27 @@
 # idalius
 
-idalius is a novelty IRC bot who counts user-set trigger words in
-IRC channel messages and constructs a reply of user-set replies for each
-instance of a trigger word in a message.
+idalius started out as a novelty IRC bot. Its original functionality has now
+been moved into an optional module, "tittilate", while the remainder of the
+bot's functionality is mostly configurable and extensible.
 
-It's hard to word it nicely, so here's an example.
+## Module: URL Title
 
-## Example:
+idalius can pick a URL out of any channel message and respond in-channel with
+the title of the link, followed by the domain name (really just the bit in
+between the first `//` and the first `/` in brackets, so you know roughly what
+link the title is for, without being overly verbose.
+
+	<phillid> Testing the URL title thingy https://sighup.nz/ and presuming it works
+	<idalius> Ahoy-hoy ☃ SIGHUP (sighup.nz)
+
+
+## Module: Tittilate
+
+The tittilate module is one which will ask idalius to check all channel
+messages for special keywords, and for each message containing some of those
+keywords, respond with a message with as many user-set responses to those
+keywords, in order. It's kind of hard to get your head around with plain
+words, so I'll give an example.
 
 Under the default configuration, idalius will trigger on 'sax', 'trumpet'
 and 'snake', replying with '🎷', '🎺' and '🐍' respectively. Take a look at
