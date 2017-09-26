@@ -4,7 +4,6 @@
 	  provides this"
 * auto-rejoin delay
 * auto-rejoin selectivity (on some channels not on others)
-* add admin commands to README.md
 * add more admin commands for e.g.
 	+ adding stuff on the fly
 	+ reloading modules, or changing channel blacklists/whitelists
