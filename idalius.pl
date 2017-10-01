@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use POSIX qw(setuid setgid);
+use POSIX qw(setuid setgid strftime);
 use POE;
 use POE::Kernel;
 use POE::Component::IRC;
@@ -69,6 +69,12 @@ sub drop_priv {
 	setuid($config{uid}) or die "Failed to setuid: $!\n";
 }
 
+sub log_info {
+	# FIXME direct to a log file instead of stdout
+	my $stamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime);
+	print "$stamp | @_\n";
+}
+
 sub _start {
 	my $heap = $_[HEAP];
 	my $irc = $heap->{irc};
@@ -81,7 +87,7 @@ sub irc_001 {
 	my $sender = $_[SENDER];
 	my $irc = $sender->get_heap();
 
-	print "Connected to server ", $irc->server_name(), "\n";
+	log_info("Connected to server ", $irc->server_name());
 
 	$irc->yield( join => $_ ) for @{$config{channels}};
 	return;
@@ -99,7 +105,7 @@ sub irc_nick {
 sub irc_kick {
 	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
 	if ($kickee eq $current_nick) {
-		print "I was kicked by $kicker ($reason). Rejoining now.\n";
+		log_info("I was kicked by $kicker ($reason). Rejoining now.");
 		$irc->yield(join => $channel);
 	}
 	return;
@@ -114,14 +120,14 @@ sub irc_public {
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
 
-	print("[$channel] $who: $what\n");
+	log_info("[$channel] $who: $what");
 
 	# reject ignored nicks first
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
 	for my $module (@plugin_list) {
 		my $stripped_what = strip_color(strip_formatting($what));
-		my $output = $module->message($irc->nick_name, $who, $where, $what, $stripped_what);
+		my $output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what);
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
 
@@ -243,6 +249,6 @@ sub _default {
 			push ( @output, "'$arg'" );
 		}
 	}
-	print join ' ', @output, "\n";
+	log_info(join ' ', @output);
 	return;
 }

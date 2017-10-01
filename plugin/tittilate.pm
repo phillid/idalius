@@ -15,7 +15,7 @@ sub configure {
 }
 
 sub message {
-	my ($self, $me, $who, $where, $raw_what, $what) = @_;
+	my ($self, $logger, $me, $who, $where, $raw_what, $what) = @_;
 	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});
 	my $expression = join '|', @expressions;

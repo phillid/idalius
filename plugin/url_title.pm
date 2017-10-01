@@ -18,7 +18,7 @@ sub configure {
 
 sub message
 {
-	my ($self, $me, $who, $where, $raw_what, $what) = @_;
+	my ($self, $logger, $me, $who, $where, $raw_what, $what) = @_;
 	my $url;
 
 	if ($what =~ /(https?:\/\/[^ ]+)/i) {
@@ -31,12 +31,12 @@ sub message
 	my $response = $http->get($url);
 
 	if (!$response->{success}) {
-		print "Something broke: $response->{reason}\n";
+		$logger->("Something broke: $response->{reason}");
 		return;
 	}
 
 	if (!($response->{headers}->{"content-type"} =~ m,text/html ?,)) {
-		print("Not html, giving up now\n");
+		$logger->("Not html, giving up now");
 		return;
 	}
 
