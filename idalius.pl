@@ -127,7 +127,7 @@ sub irc_public {
 
 	for my $module (@plugin_list) {
 		my $stripped_what = strip_color(strip_formatting($what));
-		my $output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what);
+		my $output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
 

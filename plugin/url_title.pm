@@ -18,7 +18,7 @@ sub configure {
 
 sub message
 {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what) = @_;
+	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $url;
 
 	if ($what =~ /(https?:\/\/[^ ]+)/i) {
