@@ -27,8 +27,8 @@ sub message {
 	my $now = time();
 	push @{$lastmsg{$nick}}, $now;
 
-	# FIXME limit buffer size to 5
 	if (@{$lastmsg{$nick}} >= $message_count) {
+		@{$lastmsg{$nick}} = splice @{$lastmsg{$nick}}, 1, $message_count - 1;
 		my $first = @{$lastmsg{$nick}}[0];
 		if ($now - $first <= $message_period) {
 			$irc->yield(kick => $channel => $nick => "Flood");
