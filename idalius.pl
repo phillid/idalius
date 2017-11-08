@@ -225,15 +225,18 @@ sub irc_invite {
 }
 
 sub irc_disconnected {
+	_default(@_); # Dump the message
 	%config = config_file::parse_config($config_file);
 	$irc->yield(connect => { });
 }
 
 sub irc_error {
+	_default(@_); # Dump the message
 	$irc->yield(connect => { });
 }
 
 sub irc_socketerr {
+	_default(@_); # Dump the message
 	$irc->yield(connect => { });
 }
 
