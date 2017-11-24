@@ -141,10 +141,7 @@ sub irc_msg {
 		$irc->yield(privmsg => $nick => "You must identify with services");
 		return;
 	}
-	if (!grep {$_ eq $who} @{$config{admins}}) {
-		$irc->yield(privmsg => $nick => "I am bot, go away");
-		return;
-	}
+	return unless grep {$_ eq $who} @{$config{admins}};
 	# FIXME this needs tidying. Some of this can be factored out, surely.
 	if ($what =~ /^nick\s/) {
 		my ($newnick) = $what =~ /^nick\s+(\S+)$/;
