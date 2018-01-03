@@ -174,6 +174,28 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Syntax: nick <nick>");
 		}
 	}
+	if ($what =~ /^ignore\s/) {
+		my ($target) = $what =~ /^ignore\s+(\S+)$/;
+		if ($target) {
+			push @{$config{ignore}}, $target;
+			$irc->yield(privmsg => $nick => "Ignoring $target.");
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: ignore <nick>");
+		}
+	}
+	if ($what =~ /^don't ignore\s/) {
+		my ($target) = $what =~ /^don't ignore\s+(\S+)$/;
+		if ($target) {
+			if (grep { $_ eq $target} @{$config{ignore}}) {
+				@{$config{ignore}} = grep { $_ ne $target } @{$config{ignore}};
+				$irc->yield(privmsg => $nick => "No longer ignoring $target.");
+			} else {
+				$irc->yield(privmsg => $nick => "I wasn't ignoring $target anyway.");
+			}
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: don't ignore <nick>");
+		}
+	}
 	if ($what =~ /^part\s/) {
 		my $message;
 		if ($what =~ /^part(\s+(\S+))+$/m) {
