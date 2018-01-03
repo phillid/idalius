@@ -21,7 +21,8 @@ sub parse_config
 		'user',
 		'group',
 		'url_on',
-		'url_len');
+		'url_len',
+		'antiflood_on');
 	my @list_configs = (
 		'channels',
 		'ignore',

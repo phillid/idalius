@@ -24,6 +24,8 @@ sub message {
 	my $channel = $where->[0];
 	my $nick = (split /!/, $who)[0];
 
+	return if ($config{antiflood_on} == 0);
+
 	my $now = time();
 	push @{$lastmsg{$nick}}, $now;
 
