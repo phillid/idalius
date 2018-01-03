@@ -21,6 +21,8 @@ sub message
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $url;
 
+	return if ($config{url_on} == 0);
+
 	if ($what =~ /(https?:\/\/[^ ]+)/i) {
 		$url = $1;
 	}
