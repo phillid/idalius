@@ -13,6 +13,7 @@ use Module::Pluggable search_path => "plugin", instantiate => 'configure';
 
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
+my %laststrike = ();
 
 $| = 1;
 
@@ -75,6 +76,26 @@ sub log_info {
 	print "$stamp | @_\n";
 }
 
+# Add a strike against a nick for module flood protection
+# This differs from antiflood.pm in that it is used only for when users have
+# triggered a response from the bot.
+sub strike_add {
+	my $strike_count = 15;
+	my $strike_period = 30;
+
+	my ($nick) = @_;
+	my $now = time();
+	push @{$laststrike{$nick}}, $now;
+	if (@{$laststrike{$nick}} >= $strike_count) {
+		@{$laststrike{$nick}} = splice @{$laststrike{$nick}}, 1, $strike_count - 1;
+		my $first = @{$laststrike{$nick}}[0];
+		if ($now - $first <= $strike_period) {
+			log_info "Ignoring $nick because of command flood\n";
+			push @{$config{ignore}}, $nick;
+		}
+	}
+}
+
 sub _start {
 	my $heap = $_[HEAP];
 	my $irc = $heap->{irc};
@@ -128,6 +149,7 @@ sub irc_public {
 	for my $module (@plugin_list) {
 		my $stripped_what = strip_color(strip_formatting($what));
 		my $output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
+		strike_add $nick if $output;
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
 
