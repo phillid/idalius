@@ -14,6 +14,7 @@ use Module::Pluggable search_path => "plugin", instantiate => 'configure';
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
 my %laststrike = ();
+my $ping_delay = 300;
 
 $| = 1;
 
@@ -56,7 +57,8 @@ POE::Session->create(
 			irc_nick
 			irc_disconnected
 			irc_error
-			irc_socketerr) ],
+			irc_socketerr
+			custom_ping) ],
 	],
 	heap => { irc => $irc },
 );
@@ -64,6 +66,12 @@ POE::Session->create(
 drop_priv();
 
 $poe_kernel->run();
+
+sub custom_ping {
+	my ($irc, $heap) = @_[KERNEL, HEAP];
+	$irc->yield(userhost => $current_nick);
+	$irc->delay(custom_ping => $ping_delay);
+}
 
 sub drop_priv {
 	setgid($config{gid}) or die "Failed to setgid: $!\n";
@@ -105,12 +113,13 @@ sub _start {
 }
 
 sub irc_001 {
-	my $sender = $_[SENDER];
-	my $irc = $sender->get_heap();
+	my ($irc, $sender) = @_[KERNEL, SENDER];
+	my $heap = $sender->get_heap();
 
-	log_info("Connected to server ", $irc->server_name());
+	log_info("Connected to server ", $heap->server_name());
 
-	$irc->yield( join => $_ ) for @{$config{channels}};
+	$heap->yield(join => $_) for @{$config{channels}};
+	$irc->delay(custom_ping => $ping_delay);
 	return;
 }
 
