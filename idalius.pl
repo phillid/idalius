@@ -98,7 +98,7 @@ sub strike_add {
 		@{$laststrike{$nick}} = splice @{$laststrike{$nick}}, 1, $strike_count - 1;
 		my $first = @{$laststrike{$nick}}[0];
 		if ($now - $first <= $strike_period) {
-			log_info "Ignoring $nick because of command flood\n";
+			log_info "Ignoring $nick because of command flood";
 			push @{$config{ignore}}, $nick;
 		}
 	}
