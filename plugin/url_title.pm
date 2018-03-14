@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use HTTP::Tiny;
 use HTML::HeadParser;
+use utf8;
 
 my %config;
 
@@ -49,6 +50,7 @@ sub message
 
 	# get title and unpack from utf8 (assumption)
 	my $title = $parser->header("title");
+	utf8::upgrade($title);
 	return unless $title;
 
 	my $shorturl = $url;
