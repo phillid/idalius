@@ -58,6 +58,16 @@ sub parse_config
 		$triggers{$match} = $response;
 	}
 
+	# special case: timezones hash
+	my %timezone;
+	foreach (split ',', $config->{_}->{timezone}) {
+		my ($who, $tz) = split /=>/;
+		# strip outer quotes
+		$who =~ s/^[^']*'|'[^']*$//g;
+		$tz =~ s/^[^']*'|'[^']*$//g;
+		$timezone{$who} = $tz;
+	}
+
 	$built_config{uid} = getpwnam($built_config{user})
 		or die "Cannot get uid of $built_config{user}: $!\n";
 	$built_config{gid} = getgrnam($built_config{group})
@@ -65,6 +75,7 @@ sub parse_config
 
 
 	$built_config{triggers} = \%triggers;
+	$built_config{timezone} = \%timezone;
 
 	return %built_config;
 }
