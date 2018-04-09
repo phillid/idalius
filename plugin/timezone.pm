@@ -22,14 +22,18 @@ sub message {
 	my $who_nick = ( split /!/, $who )[0];
 
 	my @known_zones = (keys %{$config{timezone}});
-	if ($what =~ /^%time\s(.+)$/) {
-		my $nick = $1;
-		if (grep {$_ eq $nick} @known_zones) {
-			my $d = DateTime->now();
-			$d->set_time_zone($config{timezone}->{$nick});
-			return "$who_nick: $nick\'s clock reads $d";
+	if ($what =~ /^%time\s/) {
+		if ($what =~ /^%time\s+(.+?)\s*$/) {
+			my $nick = $1;
+			if (grep {$_ eq $nick} @known_zones) {
+				my $d = DateTime->now();
+				$d->set_time_zone($config{timezone}->{$nick});
+				return "$who_nick: $nick\'s clock reads $d";
+			} else {
+				return "$who_nick: I don't know what timezone $nick is in";
+			}
 		} else {
-			return "$who_nick: I don't know what timezone $nick is in";
+			return "$who_nick: Syntax: %time [nick]";
 		}
 	}
 }
