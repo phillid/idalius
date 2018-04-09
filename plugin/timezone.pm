@@ -19,7 +19,7 @@ sub configure {
 sub message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 
-	my $who_nick = ( split /!/, $who )[0];
+	my $requester = ( split /!/, $who )[0];
 
 	my @known_zones = (keys %{$config{timezone}});
 	if ($what =~ /^%time\s/) {
@@ -28,12 +28,12 @@ sub message {
 			if (grep {$_ eq $nick} @known_zones) {
 				my $d = DateTime->now();
 				$d->set_time_zone($config{timezone}->{$nick});
-				return "$who_nick: $nick\'s clock reads $d";
+				return "$requester: $nick\'s clock reads $d";
 			} else {
-				return "$who_nick: I don't know what timezone $nick is in";
+				return "$requester: I don't know what timezone $nick is in";
 			}
 		} else {
-			return "$who_nick: Syntax: %time [nick]";
+			return "$requester: Syntax: %time [nick]";
 		}
 	}
 }
