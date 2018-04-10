@@ -88,7 +88,7 @@ sub run_command {
 	my ($command, $rest) = split /\s+/, $command_string, 2;
 	@arguments = split /\s+/, $rest if $rest;
 	if ($commands{$command}) {
-		return ($commands{$command})->(\&log_info, $who, $where, $rest, @arguments);
+		return ($commands{$command})->($irc, \&log_info, $who, $where, $rest, @arguments);
 	} else {
 		return "No such command \"$command\"";
 	}
