@@ -284,6 +284,15 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Syntax: action <channel> <action text>");
 		}
 	}
+	if ($what =~ /^mode\s/) {
+		my ($rest) = $what =~ /^mode\s+(.*)?$/;
+		if ($rest) {
+			$irc->yield(mode => $rest);
+			$irc->yield(privmsg => $nick => "Requested.");
+		} else {
+			$irc->yield(privmsg => $nick => "Syntax: mode [everything]");
+		}
+	}
 	if ($what =~ /^kick\s/) {
 		my ($channel, $kickee, undef, $reason) = $what =~ /^kick\s+(\S+)\s(\S+)((?:\s)(.*))?$/;
 		if ($channel and $kickee) {

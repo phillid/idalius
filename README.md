@@ -121,6 +121,17 @@ idalius to contact services like nickserv, memoserv, chanserv etc.
 Not really useful apart from having a laugh in a channel. Really not sure why
 I added this except for a lame gag or two. Worth it.
 
+### Set channel/user modes
+
+	mode #channel +v someone
+	mode #channel +vo someone opguy
+	mode #channel +n
+	mode #channel +l 5
+
+So on and so forth. What comes after "mode" is sent verbatim to the IRC client
+idalius wraps, which (as far as I know) sends it verbatim to the server. So
+you're really down to whatever the IRC server you're on will understand.
+
 ### Kick someone from a channel
 
 	kick #channel badPerson
