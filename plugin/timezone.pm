@@ -11,30 +11,30 @@ my %config;
 
 sub configure {
 	my $self = $_[0];
-	my $cref = $_[1];
+	my $cmdref = $_[1];
+	my $cref = $_[2];
 	%config = %$cref;
+
+	$cmdref->("time", sub { $self->time(@_); } );
+
 	return $self;
 }
 
-sub message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+sub time {
+	my ($self, $logger, $who, $where, $rest, @arguments) = @_;
 
-	my $requester = ( split /!/, $who )[0];
-
+	my $requester = ( split /!/, $who)[0];
 	my @known_zones = (keys %{$config{timezone}});
-	if ($what =~ /^%time\s/) {
-		if ($what =~ /^%time\s+(.+?)\s*$/) {
-			my $nick = $1;
-			if (grep {$_ eq $nick} @known_zones) {
-				my $d = DateTime->now();
-				$d->set_time_zone($config{timezone}->{$nick});
-				return "$requester: $nick\'s clock reads $d";
-			} else {
-				return "$requester: I don't know what timezone $nick is in";
-			}
-		} else {
-			return "$requester: Syntax: %time [nick]";
-		}
+
+	return "Syntax: time [nick]" unless @arguments == 1;
+
+	my $nick = $arguments[0];
+	if (grep {$_ eq $nick} @known_zones) {
+	my $d = DateTime->now();
+		$d->set_time_zone($config{timezone}->{$nick});
+		return "$requester: $nick\'s clock reads $d";
+	} else {
+		return "$requester: I don't know what timezone $nick is in";
 	}
 }
 1;

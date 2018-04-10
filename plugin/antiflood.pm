@@ -14,7 +14,8 @@ my %lastmsg = ();
 
 sub configure {
 	my $self = $_[0];
-	my $cref = $_[1];
+	my $cmdref = $_[1];
+	my $cref = $_[2];
 	%config = %$cref;
 	return $self;
 }

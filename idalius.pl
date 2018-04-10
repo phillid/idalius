@@ -16,6 +16,8 @@ my %config = config_file::parse_config($config_file);
 my %laststrike = ();
 my $ping_delay = 300;
 
+my %commands = ();
+
 $| = 1;
 
 my $current_nick = $config{nick};
@@ -24,7 +26,7 @@ my $current_nick = $config{nick};
 +$config{url_on};
 +$config{url_len};
 
-my @plugin_list = plugins("dummy", \%config);
+my @plugin_list = plugins("dummy", \&register_command, \%config, \&run_command);
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -66,6 +68,26 @@ POE::Session->create(
 drop_priv();
 
 $poe_kernel->run();
+
+
+# Register a command name to a certain sub
+sub register_command {
+	my ($command, $action) = @_;
+	print ("registering $command to $action\n");
+	$commands{$command} = $action;
+}
+
+sub run_command {
+	my ($command_string, $who, $where) = @_;
+	my @arguments;
+	my ($command, $rest) = split /\s+/, $command_string, 2;
+	@arguments = split /\s+/, $rest if $rest;
+	if ($commands{$command}) {
+		return ($commands{$command})->(\&log_info, $who, $where, $rest, @arguments);
+	} else {
+		return "No such command \"$command\"";
+	}
+}
 
 sub custom_ping {
 	my ($irc, $heap) = @_[KERNEL, HEAP];
@@ -149,15 +171,24 @@ sub irc_public {
 	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
+	my $output;
 
 	log_info("[$channel] $who: $what");
 
 	# reject ignored nicks first
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
+	my $stripped_what = strip_color(strip_formatting($what));
+	if ($stripped_what =~ s/^$config{prefix}//) {
+		$output = run_command($stripped_what, $who, $where);
+		$irc->yield(privmsg => $where => $output) if $output;
+	}
+
 	for my $module (@plugin_list) {
-		my $stripped_what = strip_color(strip_formatting($what));
-		my $output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
+		$output = "";
+		if ($module->can("message")) {
+			$output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
+		}
 		strike_add $nick if $output;
 		$irc->yield(privmsg => $where => $output) if $output;
 	}

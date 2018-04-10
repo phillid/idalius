@@ -22,6 +22,7 @@ sub parse_config
 		'group',
 		'url_on',
 		'url_len',
+		'prefix',
 		'antiflood_on');
 	my @list_configs = (
 		'channels',
