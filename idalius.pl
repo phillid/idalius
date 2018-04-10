@@ -9,7 +9,7 @@ use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use config_file;
 use IRC::Utils qw(strip_color strip_formatting);
-use Module::Pluggable search_path => "plugin", instantiate => 'configure';
+use Module::Pluggable search_path => "Plugin", instantiate => 'configure';
 
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
@@ -69,11 +69,16 @@ drop_priv();
 
 $poe_kernel->run();
 
+sub log_info {
+	# FIXME direct to a log file instead of stdout
+	my $stamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime);
+	print "$stamp | @_\n";
+}
 
 # Register a command name to a certain sub
 sub register_command {
 	my ($command, $action) = @_;
-	print ("registering $command to $action\n");
+	log_info "Registering command: $command";
 	$commands{$command} = $action;
 }
 
@@ -98,12 +103,6 @@ sub custom_ping {
 sub drop_priv {
 	setgid($config{gid}) or die "Failed to setgid: $!\n";
 	setuid($config{uid}) or die "Failed to setuid: $!\n";
-}
-
-sub log_info {
-	# FIXME direct to a log file instead of stdout
-	my $stamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime);
-	print "$stamp | @_\n";
 }
 
 # Add a strike against a nick for module flood protection

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package plugin::antiflood;
+package Plugin::Antiflood;
 
 use strict;
 use warnings;

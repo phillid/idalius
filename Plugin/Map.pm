@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package plugin::map;
+package Plugin::Map;
 
 use strict;
 use warnings;

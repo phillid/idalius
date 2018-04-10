@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package plugin::timezone;
+package Plugin::Timezone;
 
 use strict;
 use warnings;

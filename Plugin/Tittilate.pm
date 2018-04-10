@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package plugin::tittilate;
+package Plugin::Tittilate;
 
 use strict;
 use warnings;

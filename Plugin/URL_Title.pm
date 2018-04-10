@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-package plugin::url_title;
+package Plugin::URL_Title;
 
 use strict;
 use warnings;
