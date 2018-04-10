@@ -181,6 +181,7 @@ sub irc_public {
 	if ($stripped_what =~ s/^$config{prefix}//) {
 		$output = run_command($stripped_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
+		strike_add $nick if $output;
 	}
 
 	for my $module (@plugin_list) {
