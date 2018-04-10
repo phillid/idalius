@@ -121,6 +121,12 @@ idalius to contact services like nickserv, memoserv, chanserv etc.
 Not really useful apart from having a laugh in a channel. Really not sure why
 I added this except for a lame gag or two. Worth it.
 
+### Set channel topic
+
+	topic #channel new topic
+
+Does what it says on the tin.
+
 ### Set channel/user modes
 
 	mode #channel +v someone
