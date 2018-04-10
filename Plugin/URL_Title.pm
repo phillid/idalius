@@ -45,6 +45,7 @@ sub message
 	}
 
 	my $html = $response->{content};
+	utf8::decode($html);
 
 	my $parser = HTML::HeadParser->new;
 	$parser->parse($html);
