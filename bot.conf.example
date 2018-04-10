@@ -13,6 +13,8 @@ quit_msg = "Goodbye!"
 user     = nobody
 group    = nobody
 triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
+prefix   = %
+antiflood_on = 0
 
 # URL stuff
 url_on   = 1
