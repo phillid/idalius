@@ -4,6 +4,13 @@ idalius started out as a novelty IRC bot. Its original functionality has now
 been moved into an optional module, "tittilate", while the remainder of the
 bot's functionality is mostly configurable and extensible.
 
+## Commands
+
+Arbitrary commands can be registered by any module. Commands (currently
+separate from admin commands) are issued in-channel, prefixed with the string
+configured in the `bot.conf` parameter `prefix`. This is `%` by default, and
+this default will be used in this README.
+
 ## Module: URL Title
 
 idalius can pick a URL out of any channel message and respond in-channel with
