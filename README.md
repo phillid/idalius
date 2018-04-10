@@ -35,6 +35,36 @@ this IRC log:
 
 Simple eh.
 
+## Module: Antiflood
+
+This module will kick someone who send more than 5 messages in 11 seconds on
+a channel. It's on the to-do list to make these parameters configurable.
+
+## Module: Echo
+
+This module adds a command to echo strings on-channel. Example:
+
+	<someone> %echo woo stuff
+	<somebot> woo stuff
+
+## Module: Map
+
+This module allows simplistic mapping of a function across a list of arguments.
+At the moment, array syntax is just prototypical, and uses regex to split on
+commas. Thus, nesting of , within arguments is not yet possible. Examples:
+
+	<someone> %map echo foo,bar, foobar
+	<somebot> [foo, bar, foobar]
+
+## Module: Timezone
+
+This module allows timezones to be associated with words (intended for use
+with nicks) so that the command `%time foo` will return the current time,
+adjusted for the timezone associated with `foo`. Example:
+
+	<person1> %time person1
+	<somebot> person1: person1's clock reads 2018-04-10T06:39:44
+
 ## Admin commands
 
 idalius also supports some basic administration commands. These should be sent
