@@ -16,6 +16,10 @@ triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
 prefix   = %
 antiflood_on = 0
 
+# SOCKSv4(a) proxy address. Leave blank to disable
+socks_proxy =
+socks_port  =
+
 # URL stuff
 url_on   = 1
 url_len  = 0

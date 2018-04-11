@@ -35,6 +35,8 @@ my $irc = POE::Component::IRC->spawn(
 	ircname => $config{ircname},
 	port    => $config{port},
 	server  => $config{server},
+	socks_proxy => $config{socks_proxy},
+	socks_port => $config{socks_port},
 	username => $config{username},
 ) or die "Failed to create new PoCo-IRC: $!";
 
@@ -330,7 +332,8 @@ sub irc_invite {
 }
 
 sub irc_disconnected {
-	_default(@_); # Dump the message
+	log_info "Disconnected from server $_[ARG0]. Reconnecting in 20 seconds";
+	sleep(20);
 	%config = config_file::parse_config($config_file);
 	$irc->yield(connect => { });
 }
@@ -350,10 +353,11 @@ sub _default {
 	my @output = ( "$event: " );
 
 	for my $arg (@$args) {
-		if ( ref $arg eq 'ARRAY' ) {
+		if (!$arg) {
+			# skip
+		} elsif (ref $arg eq 'ARRAY') {
 			push( @output, '[' . join(', ', @$arg ) . ']' );
-		}
-		else {
+		} else {
 			push ( @output, "'$arg'" );
 		}
 	}

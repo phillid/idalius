@@ -23,6 +23,8 @@ sub parse_config
 		'url_on',
 		'url_len',
 		'prefix',
+		'socks_proxy',
+		'socks_port',
 		'antiflood_on');
 	my @list_configs = (
 		'channels',
