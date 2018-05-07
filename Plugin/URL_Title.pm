@@ -71,11 +71,12 @@ sub message
 	return unless $title;
 
 	my $shorturl = $url;
-	$shorturl = (substr $url, 0, $config{url_len}) . "…" if length ($url) > $config{url_len};
-
 	# remove http(s):// to avoid triggering other poorly configured bots
 	$shorturl =~ s,^https?://,,g;
 	$shorturl =~ s,/$,,g;
+
+	# truncate URL without http(s):// to configured length if needed
+	$shorturl = (substr $shorturl, 0, $config{url_len}) . "…" if length ($shorturl) > $config{url_len};
 
 	my $composed_title = "$title ($shorturl)";
 	return $composed_title;
