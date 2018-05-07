@@ -64,6 +64,9 @@ sub message
 	$p->parse($html);
 	die "Error: $!\n" if $!;
 
+	$title =~ s/\s+/ /g;
+	$title =~ s/(^\s+|\s+$)//g;
+
 	utf8::upgrade($title);
 	return unless $title;
 
