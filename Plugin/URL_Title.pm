@@ -5,7 +5,7 @@ package Plugin::URL_Title;
 use strict;
 use warnings;
 use HTTP::Tiny;
-use HTML::HeadParser;
+use HTML::Parser;
 use utf8;
 
 my %config;
@@ -16,6 +16,17 @@ sub configure {
 	my $cref = $_[2];
 	%config = %$cref;
 	return $self;
+}
+
+my $title;
+
+sub start_handler
+{
+	return if shift ne "title";
+	my $self = shift;
+	$self->handler(text => sub { $title = shift; }, "dtext");
+	$self->handler(end  => sub { shift->eof if shift eq "title"; },
+	                    "tagname,self");
 }
 
 sub message
@@ -47,11 +58,12 @@ sub message
 	my $html = $response->{content};
 	utf8::decode($html);
 
-	my $parser = HTML::HeadParser->new;
-	$parser->parse($html);
+	$title = "";
+	my $p = HTML::Parser->new(api_version => 3);
+	$p->handler( start => \&start_handler, "tagname,self");
+	$p->parse($html);
+	die "Error: $!\n" if $!;
 
-	# get title and unpack from utf8 (assumption)
-	my $title = $parser->header("title");
 	utf8::upgrade($title);
 	return unless $title;
 
