@@ -294,6 +294,10 @@ sub irc_msg {
 			$irc->yield(privmsg => $nick => "Syntax: topic <channel> <topic>");
 		}
 	}
+	if ($what =~ /^who are you ignoring/) {
+		my $ignores = join ", ", @{$config{ignore}};
+		$irc->yield(privmsg => $nick => "I am ignoring: $ignores");
+	}
 	if ($what =~ /^mode\s/) {
 		my ($rest) = $what =~ /^mode\s+(.*)?$/;
 		if ($rest) {
