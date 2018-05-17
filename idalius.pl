@@ -109,10 +109,10 @@ sub drop_priv {
 # This differs from antiflood.pm in that it is used only for when users have
 # triggered a response from the bot.
 sub strike_add {
-	my $strike_count = 15;
-	my $strike_period = 30;
+	my $strike_count = 14;
+	my $strike_period = 45;
 
-	my ($nick) = @_;
+	my ($nick, $channel) = @_;
 	my $now = time();
 	push @{$laststrike{$nick}}, $now;
 	if (@{$laststrike{$nick}} >= $strike_count) {
@@ -120,6 +120,7 @@ sub strike_add {
 		my $first = @{$laststrike{$nick}}[0];
 		if ($now - $first <= $strike_period) {
 			log_info "Ignoring $nick because of command flood";
+			$irc->yield(privmsg => $channel => "$nick: I'm ignoring you now, you've caused me to talk too much");
 			push @{$config{ignore}}, $nick;
 		}
 	}
@@ -181,7 +182,7 @@ sub irc_public {
 	if ($stripped_what =~ s/^$config{prefix}//) {
 		$output = run_command($stripped_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
-		strike_add $nick if $output;
+		strike_add($nick, $channel) if $output;
 	}
 
 	for my $module (@plugin_list) {
@@ -189,7 +190,7 @@ sub irc_public {
 		if ($module->can("message")) {
 			$output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
 		}
-		strike_add $nick if $output;
+		strike_add($nick, $channel) if $output;
 		$irc->yield(privmsg => $where => $output) if $output;
 	}
 
