@@ -190,8 +190,8 @@ sub irc_public {
 		if ($module->can("message")) {
 			$output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
 		}
-		strike_add($nick, $channel) if $output;
 		$irc->yield(privmsg => $where => $output) if $output;
+		strike_add($nick, $channel) if $output;
 	}
 
 	return;
