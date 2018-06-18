@@ -41,7 +41,9 @@ sub message
 	}
 	return unless $url;
 
-	my $http = HTTP::Tiny->new((default_headers => {'Range' => "bytes=0-65536", 'Accept' => 'text/html'}, timeout => 3));
+	# FIXME add more XML-based formats that we can theoretically extract titles from
+	# FIXME factor out accepted formats and response match into accepted formats array
+	my $http = HTTP::Tiny->new((default_headers => {'Range' => "bytes=0-65536", 'Accept' => 'text/html, image/svg+xml'}, timeout => 3));
 
 	my $response = $http->get($url);
 
@@ -50,8 +52,8 @@ sub message
 		return;
 	}
 
-	if (!($response->{headers}->{"content-type"} =~ m,text/html ?,)) {
-		$logger->("Not html, giving up now");
+	if (!($response->{headers}->{"content-type"} =~ m,(text/html|image/svg\+xml),)) {
+		$logger->("I don't think I can parse titles from $response->{headers}->{'content-type'} - stopping here");
 		return;
 	}
 
