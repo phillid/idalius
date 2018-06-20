@@ -36,7 +36,8 @@ sub message
 
 	return if ($config{url_on} == 0);
 
-	if ($what =~ /(https?:\/\/[^ ]+)/i) {
+	# Drawn from RFC 3986§2
+	if ($what =~ /(https?:\/\/[A-z0-9\-\._~:\/\?#\[\]@\!\$&'()\*\+,;=]+)/i) {
 		$url = $1;
 	}
 	return unless $url;
