@@ -30,9 +30,10 @@ sub time {
 
 	my $nick = $arguments[0];
 	if (grep {$_ eq $nick} @known_zones) {
-	my $d = DateTime->now();
+		my $d = DateTime->now();
 		$d->set_time_zone($config{timezone}->{$nick});
-		return "$requester: $nick\'s clock reads $d";
+		my $timestr = $d->strftime("%Y-%m-%d %H:%M %Z");
+		return "$requester: $nick\'s clock reads $timestr";
 	} else {
 		return "$requester: I don't know what timezone $nick is in";
 	}
