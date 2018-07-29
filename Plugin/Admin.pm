@@ -17,7 +17,7 @@ sub configure {
 	$cmdref->("action", sub { $self->action(@_); } );
 
 	$cmdref->("nick", sub { $self->nick(@_); } );
-	$cmdref->("join", sub { $self->join(@_); } );
+	$cmdref->("join", sub { $self->join_channel(@_); } );
 	$cmdref->("part", sub { $self->part(@_); } );
 	$cmdref->("mode", sub { $self->mode(@_); } );
 	$cmdref->("kick", sub { $self->kick(@_); } );
@@ -74,7 +74,7 @@ sub action {
 	$irc->yield(ctcp => $arguments[0] => "ACTION $rest");
 }
 
-sub join {
+sub join_channel {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 
 	return unless is_admin($who);
