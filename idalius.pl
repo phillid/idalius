@@ -31,6 +31,8 @@ my @plugin_list = plugins("dummy", \&register_command, \%config, \&run_command);
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
 	UseSSL => $config{usessl},
+	SSLCert => $config{sslcert},
+	SSLKey => $config{sslkey},
 	nick => $config{nick},
 	ircname => $config{ircname},
 	port    => $config{port},
