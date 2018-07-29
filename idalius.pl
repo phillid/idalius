@@ -85,13 +85,22 @@ sub register_command {
 sub run_command {
 	my ($command_string, $who, $where) = @_;
 	my @arguments;
-	my ($command, $rest) = split /\s+/, $command_string, 2;
-	@arguments = split /\s+/, $rest if $rest;
-	if ($commands{$command}) {
-		return ($commands{$command})->($irc, \&log_info, $who, $where, $rest, @arguments);
-	} else {
-		return "No such command \"$command\"";
+	my $command_verbatim;
+	my $command;
+
+	for my $c (keys %commands) {
+		if (($command_verbatim) = $command_string =~ m/^(\Q$c\E( |$))/) {
+			$command = $c;
+			last;
+		}
 	}
+
+	return "No such command" unless $command;
+
+	my $rest = (split "\Q$command_verbatim", $command_string, 2)[1];
+	@arguments = split /\s+/, $rest if $rest;
+
+	return ($commands{$command})->($irc, \&log_info, $who, $where, $rest, @arguments);
 }
 
 sub custom_ping {
@@ -210,122 +219,11 @@ sub irc_msg {
 		return;
 	}
 	return unless $is_admin;
-	# FIXME this needs tidying. Some of this can be factored out, surely.
-	if ($what =~ /^nick\s/) {
-		my ($newnick) = $what =~ /^nick\s+(\S+)$/;
-		if ($newnick) {
-			$irc->yield(nick => $newnick);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: nick <nick>");
-		}
-	}
-	if ($what =~ /^ignore\s/) {
-		my ($target) = $what =~ /^ignore\s+(\S+)$/;
-		if ($target) {
-			push @{$config{ignore}}, $target;
-			$irc->yield(privmsg => $nick => "Ignoring $target.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: ignore <nick>");
-		}
-	}
-	if ($what =~ /^don't ignore\s/) {
-		my ($target) = $what =~ /^don't ignore\s+(\S+)$/;
-		if ($target) {
-			if (grep { $_ eq $target} @{$config{ignore}}) {
-				@{$config{ignore}} = grep { $_ ne $target } @{$config{ignore}};
-				$irc->yield(privmsg => $nick => "No longer ignoring $target.");
-			} else {
-				$irc->yield(privmsg => $nick => "I wasn't ignoring $target anyway.");
-			}
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: don't ignore <nick>");
-		}
-	}
-	if ($what =~ /^part\s/) {
-		my $message;
-		if ($what =~ /^part(\s+(\S+))+$/m) {
-			$what =~ s/^part\s+//;
-			my ($chan_str, $reason) = split /\s+(?!#)/, $what, 2;
-			my @channels = split /\s+/, $chan_str;
-			$reason = "Commanded by $nick" unless $reason;
-			$irc->yield(part => @channels => $reason);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick =>
-			            "Syntax: part <channel1> [channel2 ...] [partmsg]");
-		}
-	}
-	if ($what =~ /^join\s/) {
-		if ($what =~ /^join(\s+(\S+))+$/) {
-			$what =~ s/^join\s+//;
-			my @channels = split /\s+/, $what;
-			$irc->yield(join => $_) for @channels;
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick =>
-			            "Syntax: join <channel1> [channel2 ...]");
-		}
-	}
-	if ($what =~ /^say\s/) {
-		my ($channel, $message) = $what =~ /^say\s+(\S+)\s(.*)$/;
-		if ($channel and $message) {
-			$irc->yield(privmsg => $channel => $message);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: say <channel> <msg>");
-		}
-	}
-	if ($what =~ /^action\s/) {
-		my ($channel, $action) = $what =~ /^action\s+(\S+)\s(.*)$/;
-		if ($channel and $action) {
-			$irc->yield(ctcp => $channel => "ACTION $action");
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: action <channel> <action text>");
-		}
-	}
-	if ($what =~ /^topic\s/) {
-		my ($channel, $topic) = $what =~ /^topic\s+(\S+)\s(.*)?$/;
-		if ($channel) {
-			$topic = "" unless $topic;
-			$irc->yield(topic => $channel => $topic);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: topic <channel> <topic>");
-		}
-	}
-	if ($what =~ /^who are you ignoring/) {
-		my $ignores = join ", ", @{$config{ignore}};
-		$irc->yield(privmsg => $nick => "I am ignoring: $ignores");
-	}
-	if ($what =~ /^mode\s/) {
-		my ($rest) = $what =~ /^mode\s+(.*)?$/;
-		if ($rest) {
-			$irc->yield(mode => $rest);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: mode [everything]");
-		}
-	}
-	if ($what =~ /^kick\s/) {
-		my ($channel, $kickee, undef, $reason) = $what =~ /^kick\s+(\S+)\s(\S+)((?:\s)(.*))?$/;
-		if ($channel and $kickee) {
-			$reason = "Requested by $nick" unless $reason;
-			$irc->yield(kick => $channel => $kickee => $reason);
-			$irc->yield(privmsg => $nick => "Requested.");
-		} else {
-			$irc->yield(privmsg => $nick => "Syntax: kick <channel> <nick> [reason]");
-		}
-	}
-	if ($what =~ /^reconnect/) {
-		my ($reason) = $what =~ /^reconnect\s+(.+)$/;
-		$irc->yield(privmsg => $nick => "Doing that now");
-		if (!$reason) {
-			$reason = $config{quit_msg};
-		}
-		$irc->yield(quit => $reason);
-	}
+
+	my $stripped_what = strip_color(strip_formatting($what));
+	my $output = run_command($stripped_what, $who, $nick);
+	$irc->yield(privmsg => $nick => $output) if $output;
+
 	return;
 }
 

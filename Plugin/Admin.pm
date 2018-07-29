@@ -26,6 +26,7 @@ sub configure {
 
 	$cmdref->("ignore", sub { $self->ignore(@_); } );
 	$cmdref->("don't ignore", sub { $self->do_not_ignore(@_); } );
+	$cmdref->("who are you ignoring?", sub { $self->dump_ignore(@_); } );
 
 	return $self;
 }
@@ -111,6 +112,7 @@ sub kick {
 	return unless is_admin($who);
 	return "Syntax: kick <channel> <nick> [reason]" unless @arguments >= 2;
 
+	# FIXME should use $where if it's a channel (?)
 	my ($channel, $kickee, undef, $reason) = $rest =~ /^(\S+)\s(\S+)((?:\s)(.*))?$/;
 	if ($channel and $kickee) {
 		my $nick = (split /!/, $who)[0];
@@ -147,7 +149,9 @@ sub ignore {
 	return unless is_admin($who);
 	return "Syntax: ignore <nick>" unless @arguments == 1;
 
-	$logger->("ERROR: UNIMPLEMENTED FEATURE");
+	push @{$config{ignore}}, $arguments[0];
+
+	return "Ignoring $arguments[0]";
 }
 
 sub do_not_ignore {
@@ -156,7 +160,23 @@ sub do_not_ignore {
 	return unless is_admin($who);
 	return "Syntax: don't ignore <nick>" unless @arguments == 1;
 
-	$logger->("ERROR: UNIMPLEMENTED FEATURE");
+	my $target = $arguments[0];
+
+	if (grep { $_ eq $target} @{$config{ignore}}) {
+		@{$config{ignore}} = grep { $_ ne $target } @{$config{ignore}};
+		return "No longer ignoring $target.";
+	} else {
+		return "I wasn't ignoring $target anyway.";
+	}
+}
+
+sub dump_ignore {
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+
+	return "Syntax: who are you ignoring?" unless @arguments == 0;
+
+	# FIXME special case for empty ignore
+	return "I am ignoring: " . join ", ", @{$config{ignore}};
 }
 
 
