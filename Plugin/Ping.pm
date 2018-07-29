@@ -17,7 +17,7 @@ sub configure {
 }
 
 sub ping {
-	my ($self, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 	my $nick = (split /!/, $who)[0];
 	return "$nick: pong";
 }
