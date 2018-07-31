@@ -23,7 +23,7 @@ sub configure {
 sub time {
 	my ($self, $logger, $who, $where, $rest, @arguments) = @_;
 
-	my $requester = ( split /!/, $who)[0];
+	my $requester = (split /!/, $who)[0];
 	my @known_zones = (keys %{$config{timezone}});
 
 	return "Syntax: time [nick]" unless @arguments == 1;
