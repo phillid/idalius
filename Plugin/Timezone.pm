@@ -29,7 +29,7 @@ sub time {
 	return "Syntax: time [nick]" unless @arguments == 1;
 
 	my $nick = $arguments[0];
-	if (grep {$_ eq $nick} @known_zones) {
+	if (grep {$_ =~ /^$nick$/i} @known_zones) {
 		my $d = DateTime->now();
 		$d->set_time_zone($config{timezone}->{$nick});
 		my $timestr = $d->strftime("%Y-%m-%d %H:%M %Z");
