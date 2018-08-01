@@ -326,6 +326,13 @@ sub irc_msg {
 		}
 		$irc->yield(quit => $reason);
 	}
+	if ($what =~ /^(help|guts|source)/ {
+		my @hosts = ("github.com", "gitlab.com");
+		my @sources = map {"https://$_/phillid/idalius"} @hosts;
+		my $help_message = "My guts can be browsed at: ";
+		$help_message .= join " ", @sources;
+		$irc->yield(privmsg => $channel => $help_message);
+	}
 	return;
 }
 
