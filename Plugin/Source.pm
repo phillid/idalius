@@ -16,8 +16,10 @@ sub configure {
 }
 
 sub source {
-	my ($self, $logger, $who, $where, $rest, @arguments) = @_;
-	my @urls = ("https://gitlab.com/dphillips/idalius");
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my @urls = (
+		"https://git.nah.nz/idalius/",
+		"https://gitlab.com/dphillips/idalius");
 	my $help_message = "My guts can be browsed at: ";
 	return $help_message . join " ", @urls;
 }
