@@ -15,6 +15,8 @@ sub parse_config
 		'server',
 		'port',
 		'usessl',
+		'sslcert',
+		'sslkey',
 		'password',
 		'must_id',
 		'quit_msg',

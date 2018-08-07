@@ -22,7 +22,7 @@ sub configure {
 }
 
 sub map {
-	my ($self, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 	my ($command, $subjects) = ($rest =~ /^(.+?)\s+(.*)$/);
 
 	return "[]" unless $subjects;
