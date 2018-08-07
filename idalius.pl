@@ -151,6 +151,7 @@ sub irc_001 {
 
 	log_info("Connected to server ", $heap->server_name());
 
+	$current_nick = $config{nick};
 	$heap->yield(join => $_) for @{$config{channels}};
 	$irc->delay(custom_ping => $ping_delay);
 	return;
