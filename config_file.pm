@@ -24,6 +24,7 @@ sub parse_config
 		'group',
 		'url_on',
 		'url_len',
+		'prefix_nick',
 		'prefix',
 		'antiflood_on');
 	my @list_configs = (

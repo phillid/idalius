@@ -15,6 +15,7 @@ quit_msg = "Goodbye!"
 user     = nobody
 group    = nobody
 triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
+prefix_nick = 1
 prefix   = %
 antiflood_on = 0
 

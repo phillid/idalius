@@ -190,7 +190,8 @@ sub irc_public {
 	return if (grep {$_ eq $nick} @{$config{ignore}});
 
 	my $stripped_what = strip_color(strip_formatting($what));
-	if ($stripped_what =~ s/^$config{prefix}//) {
+	if ($config{prefix_nick} && $stripped_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	    $stripped_what =~ s/^$config{prefix}//) {
 		$output = run_command($stripped_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;
