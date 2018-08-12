@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package Plugin::Source;
 
 use strict;

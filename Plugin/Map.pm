@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package Plugin::Map;
 
 use strict;

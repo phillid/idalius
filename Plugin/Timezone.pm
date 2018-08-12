@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package Plugin::Timezone;
 
 use strict;

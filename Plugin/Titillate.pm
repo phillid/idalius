@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package Plugin::Titillate;
 
 use strict;
