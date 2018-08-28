@@ -1,5 +1,3 @@
-#!/usr/bin/env perl
-
 package config_file;
 
 use strict;
