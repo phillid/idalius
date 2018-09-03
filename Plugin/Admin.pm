@@ -25,6 +25,7 @@ sub configure {
 	$cmdref->("ignore", sub { $self->ignore(@_); } );
 	$cmdref->("don't ignore", sub { $self->do_not_ignore(@_); } );
 	$cmdref->("who are you ignoring?", sub { $self->dump_ignore(@_); } );
+	$cmdref->("exit", sub { $self->exit(@_); } );
 
 	return $self;
 }
@@ -177,5 +178,12 @@ sub dump_ignore {
 	return "I am ignoring: " . join ", ", @{$config{ignore}};
 }
 
+sub exit {
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+
+	return "Syntax: exit" unless @arguments == 0;
+
+	exit;
+}
 
 1;
