@@ -20,15 +20,14 @@ sub parse_config
 		'quit_msg',
 		'user',
 		'group',
-		'url_on',
 		'url_len',
 		'prefix_nick',
-		'prefix',
-		'antiflood_on');
+		'prefix');
 	my @list_configs = (
 		'channels',
 		'ignore',
-		'admins');
+		'admins',
+		'plugins');
 	my @optional_configs = (
 		'password');
 	my $file = $_[0];

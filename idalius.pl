@@ -9,14 +9,31 @@ use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
 use config_file;
 use IRC::Utils qw(strip_color strip_formatting);
-use Module::Pluggable search_path => "Plugin", instantiate => 'configure';
 
 my $config_file = "bot.conf";
 my %config = config_file::parse_config($config_file);
 my %laststrike = ();
 my $ping_delay = 300;
-
 my %commands = ();
+
+sub log_info {
+	# FIXME direct to a log file instead of stdout
+	my $stamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime);
+	print "$stamp | @_\n";
+}
+
+eval {
+	for my $module (@{$config{plugins}}) {
+		log_info "Loading $module";
+		(my $path = $module) =~ s,::,/,g;
+		require $path . ".pm";
+		$module->configure(\&register_command, \%config, \&run_command);
+	}
+	1;
+} or do {
+	log_info "Error: failed to load module: $@";
+};
+
 
 $| = 1;
 
@@ -25,8 +42,6 @@ my $current_nick = $config{nick};
 # Hack: coerce into numeric type
 +$config{url_on};
 +$config{url_len};
-
-my @plugin_list = plugins("dummy", \&register_command, \%config, \&run_command);
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -71,10 +86,10 @@ drop_priv();
 
 $poe_kernel->run();
 
-sub log_info {
-	# FIXME direct to a log file instead of stdout
-	my $stamp = strftime("%Y-%m-%d %H:%M:%S %z", localtime);
-	print "$stamp | @_\n";
+sub module_is_enabled {
+	my $module = $_[0];
+
+	return grep {$_ eq $module} @{$config{plugins}};
 }
 
 # Register a command name to a certain sub
@@ -198,13 +213,12 @@ sub irc_public {
 		strike_add($nick, $channel) if $output;
 	}
 
-	for my $module (@plugin_list) {
-		$output = "";
-		if ($module->can("message")) {
+	for my $module (@{$config{plugins}}) {
+		if (module_is_enabled($module) && $module->can("message")) {
 			$output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
+			$irc->yield(privmsg => $where => $output) if $output;
+			strike_add($nick, $channel) if $output;
 		}
-		$irc->yield(privmsg => $where => $output) if $output;
-		strike_add($nick, $channel) if $output;
 	}
 
 	return;

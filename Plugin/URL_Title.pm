@@ -32,8 +32,6 @@ sub message
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $url;
 
-	return if ($config{url_on} == 0);
-
 	# Drawn from RFC 3986§2
 	if ($what =~ /(https?:\/\/[a-z0-9\-\._~:\/\?#\[\]@\!\$&'()\*\+,;=%]+)/i) {
 		$url = $1;

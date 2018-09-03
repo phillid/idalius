@@ -1,3 +1,4 @@
+plugins  = Plugin::Titillate, Plugin::Admin, Plugin::Ping
 nick     = somebot
 username = bot
 ircname  = a bot
@@ -17,9 +18,7 @@ group    = nobody
 triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
 prefix_nick = 1
 prefix   = %
-antiflood_on = 0
 
 # URL stuff
-url_on   = 1
 url_len  = 0
 
