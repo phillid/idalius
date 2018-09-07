@@ -95,6 +95,7 @@ sub module_is_enabled {
 # Register a command name to a certain sub
 sub register_command {
 	my ($command, $action) = @_;
+	$command = lc $command;
 	log_info "Registering command: $command";
 	$commands{$command} = $action;
 }
@@ -106,8 +107,8 @@ sub run_command {
 	my $command;
 
 	for my $c (keys %commands) {
-		if (($command_verbatim) = $command_string =~ m/^(\Q$c\E( |$))/) {
-			$command = $c;
+		if (($command_verbatim) = $command_string =~ m/^(\Q$c\E( |$))/i) {
+			$command = lc $c;
 			last;
 		}
 	}
