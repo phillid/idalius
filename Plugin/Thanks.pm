@@ -24,7 +24,7 @@ sub thanks {
 		"No problem",
 		"No problem!",
 		"Pas de problème",
-		"Don\'t worry about it",
+		"Don't worry about it",
 		"That's fine dude"
 	);
 	return "$nick: " . $responses[rand(@responses)];
