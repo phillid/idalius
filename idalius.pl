@@ -205,6 +205,8 @@ sub handle_common {
 	# Return early if should ignore
 	return if should_ignore($nick);
 
+	$what =~ s/^\s+|\s+$//g;
+
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
 	if ($config{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
