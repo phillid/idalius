@@ -154,7 +154,8 @@ sub strike_add {
 }
 
 sub should_ignore {
-	return grep @{$config{ignore}};
+	my ($nick) = @_;
+	return grep {$_ eq $nick} @{$config{ignore}};
 }
 
 sub _start {
