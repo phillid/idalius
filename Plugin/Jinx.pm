@@ -7,10 +7,10 @@ use strict;
 use warnings;
 
 # Last message we responded to with a jinx
-my $last_response = undef;
+my %last_response;
 
 # Last message said on the channel
-my $last = undef;
+my %last;
 my %config;
 
 sub configure {
@@ -23,32 +23,38 @@ sub configure {
 
 sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my $channel = $where->[0];
 
-	return if defined $last_response and $what eq $last_response;
+	return if $last_response{$channel} and $what eq $last_response{$channel};
 
-	if (defined $last and $last eq $what) {
-		$last_response = $last;
-		return $last;
+	if ($last{$channel} and $last{$channel} eq $what) {
+		$last_response{$channel} = $what;
+		return $what;
 	}
 
-	$last = $what;
-	$last_response = undef;
+	$logger->("Storing on_message for $channel $what");
+
+	$last{$channel} = $what;
+	$last_response{$channel} = undef;
 	return;
 }
 
 sub on_action {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my $channel = $where->[0];
 
-	return if defined $last_response and $what eq $last_response;
+	return if $last_response{$channel} and $what eq $last_response{$channel};
 
-	if (defined $last and $last eq $what) {
-		$last_response = $last;
-		$irc->yield(ctcp => $where->[0] => "ACTION" => $what);
+	if ($last{$channel} and $last{$channel} eq $what) {
+		$last_response{$channel} = $what;
+		$irc->yield(ctcp => $channel->[0] => "ACTION" => $what);
 		return;
 	}
 
-	$last = $what;
-	$last_response = undef;
+	$logger->("Storing on_action for $channel $what");
+
+	$last{$channel} = $what;
+	$last_response{$channel} = undef;
 	return;
 }
 1;
