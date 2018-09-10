@@ -27,7 +27,7 @@ sub start_handler
 	                    "tagname,self");
 }
 
-sub message
+sub on_message
 {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $url;
@@ -81,7 +81,7 @@ sub message
 	return $composed_title;
 }
 
-sub action {
-	message(@_);
+sub on_action {
+	on_message(@_);
 }
 1;

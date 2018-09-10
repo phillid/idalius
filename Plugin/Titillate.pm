@@ -13,7 +13,7 @@ sub configure {
 	return $self;
 }
 
-sub message {
+sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $gathered = "";
 	my @expressions = (keys %{$config{triggers}});
@@ -33,7 +33,7 @@ sub message {
 	return $gathered;
 }
 
-sub action {
-	message(@_);
+sub on_action {
+	on_message(@_);
 }
 1;

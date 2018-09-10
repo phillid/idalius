@@ -21,7 +21,7 @@ sub configure {
 	return $self;
 }
 
-sub message {
+sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 
 	return if defined $last_response and $what eq $last_response;
@@ -36,7 +36,7 @@ sub message {
 	return;
 }
 
-sub action {
+sub on_action {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 
 	return if defined $last_response and $what eq $last_response;

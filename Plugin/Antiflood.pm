@@ -18,7 +18,7 @@ sub configure {
 	return $self;
 }
 
-sub message {
+sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 	my $nick = (split /!/, $who)[0];
@@ -36,7 +36,7 @@ sub message {
 	return;
 }
 
-sub action {
-	message(@_);
+sub on_action {
+	on_message(@_);
 }
 1;

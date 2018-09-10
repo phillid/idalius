@@ -214,6 +214,8 @@ sub handle_common {
 		strike_add($nick, $channel) if $output;
 	}
 
+	# handler names are defined as being prefixed with on_
+	$message_type = "on_$message_type";
 	for my $module (@{$config{plugins}}) {
 		if (module_is_enabled($module) && $module->can($message_type)) {
 			$output = $module->$message_type(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
