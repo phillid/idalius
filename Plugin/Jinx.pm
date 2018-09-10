@@ -9,7 +9,7 @@ use warnings;
 # Last message we responded to with a jinx
 my $last_response = undef;
 
-# Last message said on the channel, and whether it's action or message
+# Last message said on the channel
 my $last = undef;
 my %config;
 
