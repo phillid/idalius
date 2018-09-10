@@ -153,6 +153,10 @@ sub strike_add {
 	}
 }
 
+sub should_ignore {
+	return grep @{$config{ignore}};
+}
+
 sub _start {
 	my $heap = $_[HEAP];
 	my $irc = $heap->{irc};
@@ -191,38 +195,53 @@ sub irc_kick {
 	return;
 }
 
-sub irc_ctcp_action {
-	irc_public(@_);
-}
-
-sub irc_public {
-	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
-	my $nick = ( split /!/, $who )[0];
+sub handle_common {
+	my ($message_type, $who, $where, $what) = @_;
+	my $nick = (split /!/, $who)[0];
 	my $channel = $where->[0];
 	my $output;
 
-	log_info("[$channel] $who: $what");
-
-	# reject ignored nicks first
-	return if (grep {$_ eq $nick} @{$config{ignore}});
+	# Return early if should ignore
+	return if should_ignore($nick);
 
 	my $stripped_what = strip_color(strip_formatting($what));
+	my $no_prefix_what = $stripped_what;
 	if ($config{prefix_nick} && $stripped_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
-	    $stripped_what =~ s/^$config{prefix}//) {
-		$output = run_command($stripped_what, $who, $where);
+	    $no_prefix_what =~ s/^$config{prefix}//) {
+		$output = run_command($no_prefix_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;
 	}
 
 	for my $module (@{$config{plugins}}) {
-		if (module_is_enabled($module) && $module->can("message")) {
-			$output = $module->message(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
+		if (module_is_enabled($module) && $module->can($message_type)) {
+			$output = $module->$message_type(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
 			$irc->yield(privmsg => $where => $output) if $output;
 			strike_add($nick, $channel) if $output;
 		}
 	}
 
 	return;
+}
+
+sub irc_ctcp_action {
+	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
+	my $nick = ( split /!/, $who )[0];
+	my $channel = $where->[0];
+
+	log_info("[$channel] [action] $who $what");
+
+	return handle_common("action", $who, $where, $what);
+}
+
+sub irc_public {
+	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
+	my $nick = ( split /!/, $who )[0];
+	my $channel = $where->[0];
+
+	log_info("[$channel] $who: $what");
+
+	return handle_common("message", $who, $where, $what);
 }
 
 sub irc_msg {
