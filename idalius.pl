@@ -206,7 +206,7 @@ sub handle_common {
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
-	if ($config{prefix_nick} && $stripped_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	if ($config{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
 	    $no_prefix_what =~ s/^$config{prefix}//) {
 		$output = run_command($no_prefix_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
