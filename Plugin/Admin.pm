@@ -12,7 +12,7 @@ sub configure {
 	%config = %$cref;
 
 	$cmdref->("say", sub { $self->say(@_); } );
-	$cmdref->("action", sub { $self->action(@_); } );
+	$cmdref->("action", sub { $self->do_action(@_); } );
 
 	$cmdref->("nick", sub { $self->nick(@_); } );
 	$cmdref->("join", sub { $self->join_channel(@_); } );
@@ -61,7 +61,7 @@ sub say {
 	$irc->yield(privmsg => $arguments[0] => $rest);
 }
 
-sub action {
+sub do_action {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 
 	return unless is_admin($who);
