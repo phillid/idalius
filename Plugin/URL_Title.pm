@@ -80,4 +80,8 @@ sub message
 	my $composed_title = "$title ($shorturl)";
 	return $composed_title;
 }
+
+sub action {
+	message(@_);
+}
 1;

@@ -32,4 +32,8 @@ sub message {
 	}
 	return $gathered;
 }
+
+sub action {
+	message(@_);
+}
 1;

@@ -35,4 +35,8 @@ sub message {
 	}
 	return;
 }
+
+sub action {
+	message(@_);
+}
 1;

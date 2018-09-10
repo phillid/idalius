@@ -31,8 +31,6 @@ sub message {
 		return $last;
 	}
 
-	$logger->("Storing $what");
-
 	$last = $what;
 	$last_response = undef;
 	return;
@@ -48,8 +46,6 @@ sub action {
 		$irc->yield(ctcp => $where->[0] => "ACTION" => $what);
 		return;
 	}
-
-	$logger->("Storing action $what");
 
 	$last = $what;
 	$last_response = undef;
