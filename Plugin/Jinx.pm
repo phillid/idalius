@@ -32,8 +32,6 @@ sub on_message {
 		return $what;
 	}
 
-	$logger->("Storing on_message for $channel $what");
-
 	$last{$channel} = $what;
 	$last_response{$channel} = undef;
 	return;
@@ -50,8 +48,6 @@ sub on_action {
 		$irc->yield(ctcp => $channel->[0] => "ACTION" => $what);
 		return;
 	}
-
-	$logger->("Storing on_action for $channel $what");
 
 	$last{$channel} = $what;
 	$last_response{$channel} = undef;
