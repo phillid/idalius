@@ -46,7 +46,7 @@ sub parse_list {
 			$nest--;
 		}
 
-		if ($c eq "," || ($nest == 0 and $c eq "]")) {
+		if (($nest == 1 and $c eq ",") || ($nest == 0 and $c eq "]")) {
 			my $item = substr($input, $item_i, $i - $item_i);
 			$item =~ s/^\s+|\s+$//g;
 			push @res, $item;
@@ -66,7 +66,7 @@ sub parse_list {
 
 sub map {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
-	my ($command, $subjects_raw) = ($rest =~ /^(.+?)\s+(.*)$/);
+	my ($command, $subjects_raw) = ($rest =~ /^(.+)\s+(\[.*\])$/);
 
 	return "Syntax: map command [item1, item2, ...]" unless $command and $subjects_raw;
 
