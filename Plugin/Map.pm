@@ -67,10 +67,6 @@ sub map {
 	return "Syntax: map command [item1, item2, ...]" unless $command and $subjects_raw;
 
 	my ($e, @subjects) = parse_list($subjects_raw);
-	if ($e) {
-		print "It's error";
-	}
-	$logger->("Error: $e");
 	return $e if $e;
 
 	my @results = map { $run_command->("$command $_", $who, $where) } @subjects;
