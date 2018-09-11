@@ -40,7 +40,6 @@ $| = 1;
 my $current_nick = $config{nick};
 
 # Hack: coerce into numeric type
-+$config{url_on};
 +$config{url_len};
 
 # New PoCo-IRC object
