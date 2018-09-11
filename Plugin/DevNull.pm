@@ -22,7 +22,7 @@ sub configure {
 sub hush {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 
-	$run_command->($rest);
+	$run_command->($rest, $who, $where);
 
 	return;
 }
