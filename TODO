@@ -1,3 +1,4 @@
+* add currying support to Map.pm
 * add section to config file for each module
 	+ allow whitelisting and blacklisting under each module, per-channel
 	  e.g. "use url_title everywhere except channel ##bar where a bot already
