@@ -57,6 +57,10 @@ sub parse_list {
 
 	return ("Error: expected ], got end of line", undef) unless $nest == 0;
 
+	if ($i != length($input)) {
+		return ("Error: unexpected item in the bagging area (after ']')", undef);
+	}
+
 	return (undef, @res);
 }
 
