@@ -45,7 +45,7 @@ sub on_action {
 
 	if ($last{$channel} and $last{$channel} eq $what) {
 		$last_response{$channel} = $what;
-		$irc->yield(ctcp => $channel->[0] => "ACTION" => $what);
+		$irc->yield(ctcp => $channel => "ACTION" => $what);
 		return;
 	}
 
