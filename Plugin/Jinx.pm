@@ -53,4 +53,21 @@ sub on_action {
 	$last_response{$channel} = undef;
 	return;
 }
+
+# Even ignored nicks should be allowed to break a streak
+sub on_message_yes_really_even_from_ignored_nicks {
+	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my $channel = $where->[0];
+
+	return if $last{$channel} and $last{$channel} eq $what;
+
+	$last{$channel} = undef;
+
+	return;
+}
+
+# Even ignored nicks should be allowed to break a streak
+sub on_action_yes_really_even_from_ignored_nicks {
+	on_message_yes_really_even_from_ignored_nicks(@_);
+}
 1;
