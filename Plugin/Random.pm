@@ -1,4 +1,4 @@
-package Plugin::Shuffle;
+package Plugin::Random;
 
 use strict;
 use warnings;
@@ -14,6 +14,7 @@ sub configure {
 	%config = %$cref;
 
 	$cmdref->("shuffle", sub { $self->shuffle(@_); } );
+	$cmdref->("choose", sub { $self->choose(@_); } );
 
 	return $self;
 }
@@ -22,5 +23,10 @@ sub shuffle {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
 
 	return join " ", List::Util::shuffle(@arguments);
+}
+
+sub choose {
+	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	return (List::Util::shuffle(@arguments))[0];
 }
 1;
