@@ -1,4 +1,4 @@
-package config_file;
+package IdaliusConfig;
 
 use strict;
 use warnings;

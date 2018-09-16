@@ -7,11 +7,11 @@ use POE;
 use POE::Kernel;
 use POE::Component::IRC;
 use POE::Component::IRC::Plugin::NickServID;
-use config_file;
+use IdaliusConfig;
 use IRC::Utils qw(strip_color strip_formatting);
 
 my $config_file = "bot.conf";
-my %config = config_file::parse_config($config_file);
+my %config = IdaliusConfig::parse_config($config_file);
 my %laststrike = ();
 my $ping_delay = 300;
 my %commands = ();
@@ -283,7 +283,7 @@ sub irc_invite {
 
 sub irc_disconnected {
 	_default(@_); # Dump the message
-	%config = config_file::parse_config($config_file);
+	%config = IdaliusConfig::parse_config($config_file);
 	$irc->yield(connect => { });
 }
 
