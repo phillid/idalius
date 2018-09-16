@@ -1,4 +1,4 @@
-plugins  = Plugin::Titillate, Plugin::Admin, Plugin::Ping
+plugins  = [ Plugin::Titillate, Plugin::Admin, Plugin::Ping ]
 nick     = somebot
 username = bot
 ircname  = a bot
@@ -7,18 +7,22 @@ port     = 6667
 usessl   = 1
 sslcert  = foo.crt
 sslkey   = foo.key
-channels = #saxtalk,#bot
-ignore   = trumpetbot,abusiveuser
+channels = [ #saxtalk, #bot]
+ignore   = [trumpetbot, abusiveuser]
 password = pleffquiffle
-admins   = snargle!~kleg@glarg.example.com
 must_id  = 1
-quit_msg = "Goodbye!"
+quit_msg = Goodbye!
 user     = nobody
 group    = nobody
-triggers = 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 '
 prefix_nick = 1
 prefix   = %
 
-# URL stuff
+[Plugin::Admin]
+admins   = [ snargle!~kleg@glarg.example.com ]
+
+[Plugin::Titillate]
+triggers = { 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 ' }
+
+[Plugin::URL_Title]
 url_len  = 0
 
