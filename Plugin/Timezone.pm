@@ -5,7 +5,7 @@ use warnings;
 
 use DateTime;
 
-my %config;
+my $config;
 
 sub configure {
 	my $self = shift;
