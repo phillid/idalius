@@ -25,9 +25,9 @@ sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
-	return if $last_response{$channel} and $what eq $last_response{$channel};
+	return if $last_response{$channel} and lc $what eq lc $last_response{$channel};
 
-	if ($last{$channel} and $last{$channel} eq $what) {
+	if ($last{$channel} and lc $last{$channel} eq lc $what) {
 		$last_response{$channel} = $what;
 		return $what;
 	}
@@ -41,9 +41,9 @@ sub on_action {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
-	return if $last_response{$channel} and $what eq $last_response{$channel};
+	return if $last_response{$channel} and lc $what eq lc $last_response{$channel};
 
-	if ($last{$channel} and $last{$channel} eq $what) {
+	if ($last{$channel} and lc $last{$channel} eq lc $what) {
 		$last_response{$channel} = $what;
 		$irc->yield(ctcp => $channel => "ACTION" => $what);
 		return;
@@ -59,7 +59,7 @@ sub on_message_yes_really_even_from_ignored_nicks {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
-	return if $last{$channel} and $last{$channel} eq $what;
+	return if $last{$channel} and lc $last{$channel} eq lc $what;
 
 	$last{$channel} = undef;
 
