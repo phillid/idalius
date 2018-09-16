@@ -3,13 +3,14 @@ package Plugin::Introspect;
 use strict;
 use warnings;
 
-my %config;
+my $root_config;
 
 sub configure {
 	my $self = shift;
 	my $cmdref = shift;
-	my $cref = shift;
-	%config = %$cref;
+	shift; # run_command
+	shift; # module config
+	$root_config = shift;
 
 	$cmdref->("plugins", sub { $self->dump_plugins(@_); } );
 
@@ -18,6 +19,6 @@ sub configure {
 
 sub dump_plugins {
 	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
-	return "Plugins: " . join ", ", @{$config{plugins}};
+	return "Plugins: " . join ", ", $root_config->{plugins};
 }
 1;

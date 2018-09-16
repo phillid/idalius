@@ -3,8 +3,6 @@ package Plugin::Thanks;
 use strict;
 use warnings;
 
-my %config;
-
 sub configure {
 	my $self = shift;
 	my $cmdref = shift;

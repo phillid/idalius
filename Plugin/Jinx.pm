@@ -11,13 +11,10 @@ my %last_response;
 
 # Last message said on the channel
 my %last;
-my %config;
 
 sub configure {
 	my $self = $_[0];
 	my $cmdref = $_[1];
-	my $cref = $_[2];
-	%config = %$cref;
 	return $self;
 }
 

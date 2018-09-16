@@ -5,13 +5,9 @@ use warnings;
 
 use List::Util;
 
-my %config;
-
 sub configure {
 	my $self = shift;
 	my $cmdref = shift;
-	my $cref = shift;
-	%config = %$cref;
 
 	$cmdref->("shuffle", sub { $self->shuffle(@_); } );
 	$cmdref->("choose", sub { $self->choose(@_); } );

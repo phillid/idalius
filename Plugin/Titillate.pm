@@ -3,20 +3,20 @@ package Plugin::Titillate;
 use strict;
 use warnings;
 
-my %config;
+my $config;
 
 sub configure {
-	my $self = $_[0];
-	my $cmdref = $_[1];
-	my $cref = $_[2];
-	%config = %$cref;
+	my $self = shift;
+	my $cmdref = shift;
+	shift; # run_command
+	$config = shift;
 	return $self;
 }
 
 sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $gathered = "";
-	my @expressions = (keys %{$config{triggers}});
+	my @expressions = (keys %{$config->{triggers}});
 	my $expression = join '|', @expressions;
 	while ($what =~ /($expression)/gi) {
 		my $matched = $1;
@@ -28,7 +28,7 @@ sub on_message {
 				last;
 			}
 		}
-		$gathered .= $config{triggers}->{$key};
+		$gathered .= $config->{triggers}->{$key};
 	}
 	return $gathered;
 }

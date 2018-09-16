@@ -7,14 +7,11 @@ my $message_count = 5;
 my $message_period = 11;
 
 
-my %config;
 my %lastmsg = ();
 
 sub configure {
-	my $self = $_[0];
-	my $cmdref = $_[1];
-	my $cref = $_[2];
-	%config = %$cref;
+	my $self = shift;
+	my $cmdref = shift;
 	return $self;
 }
 

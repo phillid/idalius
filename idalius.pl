@@ -11,7 +11,7 @@ use IdaliusConfig;
 use IRC::Utils qw(strip_color strip_formatting);
 
 my $config_file = "bot.conf";
-my %config = IdaliusConfig::parse_config($config_file);
+my $config = IdaliusConfig::parse_config($config_file);
 my %laststrike = ();
 my $ping_delay = 300;
 my %commands = ();
@@ -23,42 +23,44 @@ sub log_info {
 }
 
 eval {
-	for my $module (@{$config{plugins}}) {
+	for my $module (@{$config->{_}->{plugins}}) {
 		log_info "Loading $module";
 		(my $path = $module) =~ s,::,/,g;
 		require $path . ".pm";
-		$module->configure(\&register_command, \%config, \&run_command);
+		$module->configure(
+			\&register_command,
+			\&run_command,
+			$config->{$module},
+			$config->{_});
 	}
 	1;
 } or do {
 	log_info "Error: failed to load module: $@";
+	die;
 };
 
 
 $| = 1;
 
-my $current_nick = $config{nick};
-
-# Hack: coerce into numeric type
-+$config{url_len};
+my $current_nick = $config->{_}->{nick};
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
-	UseSSL => $config{usessl},
-	SSLCert => $config{sslcert},
-	SSLKey => $config{sslkey},
-	nick => $config{nick},
-	ircname => $config{ircname},
-	port    => $config{port},
-	server  => $config{server},
-	username => $config{username},
+	UseSSL => $config->{_}->{usessl},
+	SSLCert => $config->{_}->{sslcert},
+	SSLKey => $config->{_}->{sslkey},
+	nick => $config->{_}->{nick},
+	ircname => $config->{_}->{ircname},
+	port    => $config->{_}->{port},
+	server  => $config->{_}->{server},
+	username => $config->{_}->{username},
 ) or die "Failed to create new PoCo-IRC: $!";
 
 # Plugins
-$config{password} and $irc->plugin_add(
+$config->{_}->{password} and $irc->plugin_add(
 	'NickServID',
 	POE::Component::IRC::Plugin::NickServID->new(
-		Password => $config{password}
+		Password => $config->{_}->{password}
 	));
 
 POE::Session->create(
@@ -88,7 +90,7 @@ $poe_kernel->run();
 sub module_is_enabled {
 	my $module = $_[0];
 
-	return grep {$_ eq $module} @{$config{plugins}};
+	return grep {$_ eq $module} @{$config->{_}->{plugins}};
 }
 
 # Register a command name to a certain sub
@@ -127,8 +129,8 @@ sub custom_ping {
 }
 
 sub drop_priv {
-	setgid($config{gid}) or die "Failed to setgid: $!\n";
-	setuid($config{uid}) or die "Failed to setuid: $!\n";
+	setgid($config->{_}->{gid}) or die "Failed to setgid: $!\n";
+	setuid($config->{_}->{uid}) or die "Failed to setuid: $!\n";
 }
 
 # Add a strike against a nick for module flood protection
@@ -147,14 +149,14 @@ sub strike_add {
 		if ($now - $first <= $strike_period) {
 			log_info "Ignoring $nick because of command flood";
 			$irc->yield(privmsg => $channel => "$nick: I'm ignoring you now, you've caused me to talk too much");
-			push @{$config{ignore}}, $nick;
+			push @{$config->{_}->{ignore}}, $nick;
 		}
 	}
 }
 
 sub should_ignore {
 	my ($nick) = @_;
-	return grep {$_ eq $nick} @{$config{ignore}};
+	return grep {$_ eq $nick} @{$config->{_}->{ignore}};
 }
 
 sub _start {
@@ -171,8 +173,8 @@ sub irc_001 {
 
 	log_info("Connected to server ", $heap->server_name());
 
-	$current_nick = $config{nick};
-	$heap->yield(join => $_) for @{$config{channels}};
+	$current_nick = $config->{_}->{nick};
+	$heap->yield(join => $_) for @{$config->{_}->{channels}};
 	$irc->delay(custom_ping => $ping_delay);
 	return;
 }
@@ -205,8 +207,8 @@ sub handle_common {
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
-	if (!should_ignore($nick) && ($config{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
-	    $no_prefix_what =~ s/^$config{prefix}//)) {
+	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	    $no_prefix_what =~ s/^$config->{_}->{prefix}//)) {
 		$output = run_command($no_prefix_what, $who, $where);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;
@@ -215,7 +217,7 @@ sub handle_common {
 	# handler names are defined as being prefixed with on_
 	$message_type = "on_$message_type";
 	my $ignore_suffix = "_yes_really_even_from_ignored_nicks";
-	for my $module (@{$config{plugins}}) {
+	for my $module (@{$config->{_}->{plugins}}) {
 		if (module_is_enabled($module)) {
 			if (!should_ignore($nick) and $module->can($message_type)) {
 				# Leave message type unchanged
@@ -258,12 +260,12 @@ sub irc_public {
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
-	my $is_admin = grep {$_ eq $who} @{$config{admins}};
+	my $is_admin = grep {$_ eq $who} @{$config->{_}->{admins}};
 
 	# reject ignored nicks who aren't also admins (prevent lockout)
 	return if should_ignore($nick) and not $is_admin;
 
-	if ($config{must_id} && $ided != 1) {
+	if ($config->{_}->{must_id} && $ided != 1) {
 		$irc->yield(privmsg => $nick => "You must identify with services");
 		return;
 	}
@@ -278,12 +280,12 @@ sub irc_msg {
 
 sub irc_invite {
 	my ($who, $where) = @_[ARG0 .. ARG1];
-	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config{channels}});
+	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config->{_}->{channels}});
 }
 
 sub irc_disconnected {
 	_default(@_); # Dump the message
-	%config = IdaliusConfig::parse_config($config_file);
+	$config = IdaliusConfig::parse_config($config_file);
 	$irc->yield(connect => { });
 }
 

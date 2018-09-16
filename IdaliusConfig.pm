@@ -4,8 +4,11 @@ use strict;
 use warnings;
 use Config::Tiny;
 
-sub parse_config
+use ListParser;
+
+sub check_config
 {
+	# FIXME to do: check that passed config is sane for core config vars
 	my @scalar_configs = (
 		'nick',
 		'username',
@@ -30,54 +33,41 @@ sub parse_config
 		'plugins');
 	my @optional_configs = (
 		'password');
+
+}
+
+sub parse_config
+{
 	my $file = $_[0];
 	my %built_config;
 	my $config = Config::Tiny->read($file);
 
-	# FIXME catch undefined/missing config options
-	foreach my $option (@scalar_configs) {
-		my $value = $config->{_}->{$option};
-		if (! defined $value && ! grep {$_ eq $option} @optional_configs) {
-			die "Option \"$option\" must be set in $file\n";
+	foreach my $section (keys %{$config}) {
+		foreach my $opt (keys %{$config->{$section}}) {
+			# Detect list or hash config option
+			my $c = substr $config->{$section}->{$opt}, 0, 1;
+			if ($c eq "[") {
+				my ($error, @listified) = ListParser::parse_list($config->{$section}->{$opt}, 0);
+				die $error if $error;
+				$config->{$section}->{$opt} = \@listified;
+			} elsif ($c eq "{") {
+				my ($error, %hashified) = ListParser::parse_list($config->{$section}->{$opt}, 1);
+				die $error if $error;
+				$config->{$section}->{$opt} = \%hashified;
+			}
 		}
-		$built_config{$option} = $config->{_}->{$option};
 	}
 
-	foreach my $option (@list_configs) {
-		my $vals = $config->{_}->{$option};
-		$vals =~ s/^\s+|\s+$//g;
-		@built_config{$option} = [split /\s*,\s*/, $vals];
-	}
-
-	# special case: triggers hash
-	my %triggers;
-	foreach (split ',', $config->{_}->{triggers}) {
-		my ($match, $response) = split /=>/;
-		# strip outer quotes
-		$match =~ s/^[^']*'|'[^']*$//g;
-		$response =~ s/^[^']*'|'[^']*$//g;
-		$triggers{$match} = $response;
-	}
-
-	# special case: timezones hash
-	my %timezone;
-	foreach (split ',', $config->{_}->{timezone}) {
-		my ($who, $tz) = split /=>/;
-		# strip outer quotes
-		$who =~ s/^[^']*'|'[^']*$//g;
-		$tz =~ s/^[^']*'|'[^']*$//g;
-		$timezone{$who} = $tz;
-	}
-
-	$built_config{uid} = getpwnam($built_config{user})
-		or die "Cannot get uid of $built_config{user}: $!\n";
-	$built_config{gid} = getgrnam($built_config{group})
-		or die "Cannot get gid of $built_config{group}: $!\n";
+#	my ($error, @tmp) = ListParser::parse_list($config->{_}->{plugins});
+#	$config->{_}->{plugins} = \@tmp;
 
 
-	$built_config{triggers} = \%triggers;
-	$built_config{timezone} = \%timezone;
+	# Special case
+	$config->{_}->{uid} = getpwnam($config->{_}->{user})
+		or die "Cannot get uid of $config->{_}->{user}: $!\n";
+	$config->{_}->{gid} = getgrnam($config->{_}->{group})
+		or die "Cannot get gid of $config->{_}->{group}: $!\n";
 
-	return %built_config;
+	return $config;
 }
 1;

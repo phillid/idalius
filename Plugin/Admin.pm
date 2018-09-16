@@ -3,13 +3,13 @@ package Plugin::Admin;
 use strict;
 use warnings;
 
-my %config;
+my $config;
 
 sub configure {
-	my $self = $_[0];
-	my $cmdref = $_[1];
-	my $cref = $_[2];
-	%config = %$cref;
+	my $self = shift;
+	my $cmdref = shift;
+	shift; # run_command
+	$config = shift;
 
 	$cmdref->("say", sub { $self->say(@_); } );
 	$cmdref->("action", sub { $self->do_action(@_); } );
@@ -32,7 +32,8 @@ sub configure {
 
 sub is_admin {
 	my $who = shift;
-	my $is_admin = grep {$_ eq $who} @{$config{admins}};
+	print "admins are ".(join ", ", $config->{admins})."\n";
+	my $is_admin = grep {$_ eq $who} @{$config->{admins}};
 	if (!$is_admin) {
 		# Uhh log this rather than print
 		print "$who isn't an admin, but tried to use a command";
@@ -148,7 +149,7 @@ sub ignore {
 	return unless is_admin($who);
 	return "Syntax: ignore <nick>" unless @arguments == 1;
 
-	push @{$config{ignore}}, $arguments[0];
+	push @{$config->{ignore}}, $arguments[0];
 
 	return "Ignoring $arguments[0]";
 }
@@ -161,8 +162,8 @@ sub do_not_ignore {
 
 	my $target = $arguments[0];
 
-	if (grep { $_ eq $target} @{$config{ignore}}) {
-		@{$config{ignore}} = grep { $_ ne $target } @{$config{ignore}};
+	if (grep { $_ eq $target} @{$config->{ignore}}) {
+		@{$config->{ignore}} = grep { $_ ne $target } @{$config->{ignore}};
 		return "No longer ignoring $target.";
 	} else {
 		return "I wasn't ignoring $target anyway.";
@@ -175,7 +176,7 @@ sub dump_ignore {
 	return "Syntax: who are you ignoring?" unless @arguments == 0;
 
 	# FIXME special case for empty ignore
-	return "I am ignoring: " . join ", ", @{$config{ignore}};
+	return "I am ignoring: " . join ", ", @{$config->{ignore}};
 }
 
 sub exit {

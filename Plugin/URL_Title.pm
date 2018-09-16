@@ -6,13 +6,13 @@ use HTTP::Tiny;
 use HTML::Parser;
 use utf8;
 
-my %config;
+my $config;
 
 sub configure {
-	my $self = $_[0];
-	my $cmdref = $_[1];
-	my $cref = $_[2];
-	%config = %$cref;
+	my $self = shift;
+	my $cmdref = shift;
+	shift; # run_command
+	$config = shift;
 	return $self;
 }
 
@@ -75,7 +75,7 @@ sub on_message
 	$shorturl =~ s,/$,,g;
 
 	# truncate URL without http(s):// to configured length if needed
-	$shorturl = (substr $shorturl, 0, $config{url_len}) . "…" if length ($shorturl) > $config{url_len};
+	$shorturl = (substr $shorturl, 0, $config->{url_len}) . "…" if length ($shorturl) > $config->{url_len};
 
 	my $composed_title = "$title ($shorturl)";
 	return $composed_title;
