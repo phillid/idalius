@@ -260,16 +260,6 @@ sub irc_public {
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
-	my $is_admin = grep {$_ eq $who} @{$config->{_}->{admins}};
-
-	# reject ignored nicks who aren't also admins (prevent lockout)
-	return if should_ignore($nick) and not $is_admin;
-
-	if ($config->{_}->{must_id} && $ided != 1) {
-		$irc->yield(privmsg => $nick => "You must identify with services");
-		return;
-	}
-	return unless $is_admin;
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $output = run_command($stripped_what, $who, $nick);
