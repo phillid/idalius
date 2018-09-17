@@ -10,8 +10,6 @@ sslkey   = foo.key
 channels = [ #saxtalk, #bot]
 ignore   = [trumpetbot, abusiveuser]
 password = pleffquiffle
-must_id  = 1
-quit_msg = Goodbye!
 user     = nobody
 group    = nobody
 prefix_nick = 1
@@ -19,6 +17,8 @@ prefix   = %
 
 [Plugin::Admin]
 admins   = [ snargle!~kleg@glarg.example.com ]
+must_id  = 1
+quit_msg = Goodbye!
 
 [Plugin::Titillate]
 triggers = { 'sa+x' => '🎷 ', 'trumpet' => '🎺 ', 'snake' => '🐍 ' }

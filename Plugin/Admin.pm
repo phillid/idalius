@@ -142,6 +142,8 @@ sub reconnect {
 	return unless is_admin($logger, $who, $ided);
 
 	my $reason = $rest;
+	$reason = $config->{quit_msg} unless $reason;
+
 	$irc->yield(quit => $reason);
 }
 
