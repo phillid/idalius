@@ -32,11 +32,10 @@ sub configure {
 
 sub is_admin {
 	my $who = shift;
-	print "admins are ".(join ", ", $config->{admins})."\n";
 	my $is_admin = grep {$_ eq $who} @{$config->{admins}};
 	if (!$is_admin) {
-		# Uhh log this rather than print
-		print "$who isn't an admin, but tried to use a command";
+		# FIXME log this rather than print
+		print "$who isn't an admin, but tried to use a command\n";
 	}
 	return $is_admin;
 }
