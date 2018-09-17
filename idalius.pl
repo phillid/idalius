@@ -102,7 +102,7 @@ sub register_command {
 }
 
 sub run_command {
-	my ($command_string, $who, $where) = @_;
+	my ($command_string, $who, $where, $ided) = @_;
 	my @arguments;
 	my $command_verbatim;
 	my $command;
@@ -119,7 +119,7 @@ sub run_command {
 	my $rest = (split "\Q$command_verbatim", $command_string, 2)[1];
 	@arguments = split /\s+/, $rest if $rest;
 
-	return ($commands{$command})->($irc, \&log_info, $who, $where, $rest, @arguments);
+	return ($commands{$command})->($irc, \&log_info, $who, $where, $ided, $rest, @arguments);
 }
 
 sub custom_ping {
@@ -198,7 +198,7 @@ sub irc_kick {
 }
 
 sub handle_common {
-	my ($message_type, $who, $where, $what) = @_;
+	my ($message_type, $who, $where, $what, $ided) = @_;
 	my $nick = (split /!/, $who)[0];
 	my $channel = $where->[0];
 	my $output;
@@ -209,7 +209,7 @@ sub handle_common {
 	my $no_prefix_what = $stripped_what;
 	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
 	    $no_prefix_what =~ s/^$config->{_}->{prefix}//)) {
-		$output = run_command($no_prefix_what, $who, $where);
+		$output = run_command($no_prefix_what, $who, $where, $ided);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;
 	}
@@ -248,13 +248,13 @@ sub irc_ctcp_action {
 }
 
 sub irc_public {
-	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
+	my ($who, $where, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
 
 	log_info("[$channel] $who: $what");
 
-	return handle_common("message", $who, $where, $what);
+	return handle_common("message", $who, $where, $what, $ided);
 }
 
 sub irc_msg {
@@ -262,7 +262,7 @@ sub irc_msg {
 	my $nick = (split /!/, $who)[0];
 
 	my $stripped_what = strip_color(strip_formatting($what));
-	my $output = run_command($stripped_what, $who, $nick);
+	my $output = run_command($stripped_what, $who, $nick, $ided);
 	$irc->yield(privmsg => $nick => $output) if $output;
 
 	return;

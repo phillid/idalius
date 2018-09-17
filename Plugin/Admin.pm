@@ -31,28 +31,31 @@ sub configure {
 }
 
 sub is_admin {
-	my $who = shift;
+	my ($logger, $who, $ided) = @_;
+	if ($config->{must_id} and not $ided) {
+		$logger->("$who hasn't identified, but tried to use a command");
+		return 0;
+	}
 	my $is_admin = grep {$_ eq $who} @{$config->{admins}};
 	if (!$is_admin) {
-		# FIXME log this rather than print
-		print "$who isn't an admin, but tried to use a command\n";
+		$logger->("$who isn't an admin, but tried to use a command");
 	}
 	return $is_admin;
 }
 
 sub nick {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: nick <new nick>" unless @arguments == 1;
 
 	$irc->yield(nick => $arguments[0]);
 }
 
 sub say {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: say <channel> <msg>" unless @arguments >= 2;
 
 	# Strip nick/channel from message
@@ -62,9 +65,9 @@ sub say {
 }
 
 sub do_action {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: action <channel> <action text>" unless @arguments >= 2;
 
 	# Strip nick/channel from message
@@ -74,18 +77,18 @@ sub do_action {
 }
 
 sub join_channel {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: join <channel1> [channel2 ...]" unless @arguments >= 1;
 
 	$irc->yield(join => $_) for @arguments;
 }
 
 sub part {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: part <channel1> [channel2 ...] [partmsg]" unless @arguments >= 1;
 
 	my $nick = (split /!/, $who)[0];
@@ -96,9 +99,9 @@ sub part {
 }
 
 sub mode {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: mode <everything>" unless @arguments > 0;
 
 	# FIXME should use $where if it's a channel (?)
@@ -106,9 +109,9 @@ sub mode {
 }
 
 sub kick {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: kick <channel> <nick> [reason]" unless @arguments >= 2;
 
 	# FIXME should use $where if it's a channel (?)
@@ -121,9 +124,9 @@ sub kick {
 }
 
 sub topic {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: topic <new topic>" unless @arguments >= 2;
 
 	# Strip nick/channel from message
@@ -134,18 +137,18 @@ sub topic {
 }
 
 sub reconnect {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 
 	my $reason = $rest;
 	$irc->yield(quit => $reason);
 }
 
 sub ignore {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: ignore <nick>" unless @arguments == 1;
 
 	push @{$config->{ignore}}, $arguments[0];
@@ -154,9 +157,9 @@ sub ignore {
 }
 
 sub do_not_ignore {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	return unless is_admin($who);
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: don't ignore <nick>" unless @arguments == 1;
 
 	my $target = $arguments[0];
@@ -170,7 +173,7 @@ sub do_not_ignore {
 }
 
 sub dump_ignore {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
 	return "Syntax: who are you ignoring?" unless @arguments == 0;
 
@@ -179,8 +182,9 @@ sub dump_ignore {
 }
 
 sub exit {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
+	return unless is_admin($logger, $who, $ided);
 	return "Syntax: exit" unless @arguments == 0;
 
 	exit;

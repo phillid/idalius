@@ -12,7 +12,7 @@ sub configure {
 }
 
 sub source {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 	my @urls = (
 		"https://git.nah.nz/idalius/",
 		"https://gitlab.com/dphillips/idalius");

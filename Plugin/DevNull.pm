@@ -17,9 +17,9 @@ sub configure {
 }
 
 sub hush {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
-	$run_command->($rest, $who, $where);
+	$run_command->($rest, $who, $where, $ided);
 
 	return;
 }

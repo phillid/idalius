@@ -19,7 +19,7 @@ sub configure {
 }
 
 sub time {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
 	my $requester = (split /!/, $who)[0];
 	my @known_zones = (keys %{$config->{timezone}});

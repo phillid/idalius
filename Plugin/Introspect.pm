@@ -18,7 +18,7 @@ sub configure {
 }
 
 sub dump_plugins {
-	my ($self, $irc, $logger, $who, $where, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 	return "Plugins: " . join ", ", $root_config->{plugins};
 }
 1;
