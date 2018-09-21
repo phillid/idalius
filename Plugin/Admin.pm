@@ -44,6 +44,10 @@ sub configure {
 	return $self;
 }
 
+sub is_channel {
+	return @_[0] =~ m/^#+/;
+}
+
 sub is_admin {
 	my ($logger, $who, $ided) = @_;
 	if ($config->{must_id} and not $ided) {
@@ -103,7 +107,13 @@ sub part {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
-	return "Syntax: part <channel1> [channel2 ...] [partmsg]" unless @arguments >= 1;
+	return "Syntax: part <channel1> [channel2 ...] [partmsg]" unless
+		is_channel($where->[0]) or
+		(@arguments >= 1 and is_channel($arguments[0]));
+
+	if ((@arguments == 0 and is_channel($where->[0])) or @arguments >= 1 and not is_channel($arguments[0])) {
+		$rest = "$where->[0] $rest";
+	}
 
 	my $nick = (split /!/, $who)[0];
 	my ($chan_str, $reason) = split /\s+(?!#)/, $rest, 2;
