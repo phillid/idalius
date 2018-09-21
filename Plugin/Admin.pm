@@ -136,9 +136,14 @@ sub kick {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
-	return "Syntax: kick <channel> <nick> [reason]" unless @arguments >= 2;
+	return "Syntax: kick <channel> <nick> [reason]" unless
+		@arguments >= 2 and is_channel($arguments[0])
+		or @arguments >= 1 and is_channel($where->[0]);
 
-	# FIXME should use $where if it's a channel (?)
+	if (is_channel($where->[0]) and not is_channel($arguments[0])) {
+		$rest = "$where->[0] $rest";
+	}
+
 	my ($channel, $kickee, undef, $reason) = $rest =~ /^(\S+)\s(\S+)((?:\s)(.*))?$/;
 	if ($channel and $kickee) {
 		my $nick = (split /!/, $who)[0];
