@@ -3,7 +3,11 @@ package Plugin;
 use strict;
 use warnings;
 
-my $unload_callback;
+my $load_callback;
+
+sub set_load_callback {
+	($load_callback) = @_;
+};
 
 sub load_plugin {
 	my ($logger, $config, $module) = @_;
@@ -19,6 +23,7 @@ sub load_plugin {
 		$logger->($@);
 		return "Cannot load $module: $!";
 	};
+	$load_callback->($module);
 	return undef;
 }
 

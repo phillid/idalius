@@ -23,14 +23,11 @@ sub log_info {
 	print "$stamp | @_\n";
 }
 
+Plugin::set_load_callback(\&module_loaded_callback);
+
 eval {
 	for my $module (@{$config->{_}->{plugins}}) {
 		Plugin::load_plugin(\&log_info, $config->{_}, $module);
-		$module->configure(
-			\&register_command,
-			\&run_command,
-			$config->{$module},
-			$config->{_});
 	}
 	1;
 } or do {
@@ -84,6 +81,16 @@ POE::Session->create(
 drop_priv();
 
 $poe_kernel->run();
+
+sub module_loaded_callback {
+	my ($module) = @_;
+
+	$module->configure(
+		\&register_command,
+		\&run_command,
+		$config->{$module},
+		$config->{_});
+}
 
 sub module_is_enabled {
 	my $module = $_[0];
