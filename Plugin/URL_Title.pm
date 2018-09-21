@@ -6,6 +6,8 @@ use HTTP::Tiny;
 use HTML::Parser;
 use utf8;
 
+use IdaliusConfig qw/assert_scalar/;
+
 my $config;
 
 sub configure {
@@ -13,6 +15,10 @@ sub configure {
 	my $cmdref = shift;
 	shift; # run_command
 	$config = shift;
+
+	IdaliusConfig::assert_scalar($config, $self, "url_len");
+	die "url_len must be positive" if $config->{url_len} <= 0;
+
 	return $self;
 }
 

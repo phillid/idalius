@@ -3,6 +3,8 @@ package Plugin::Titillate;
 use strict;
 use warnings;
 
+use IdaliusConfig qw/assert_dict/;
+
 my $config;
 
 sub configure {
@@ -10,6 +12,9 @@ sub configure {
 	my $cmdref = shift;
 	shift; # run_command
 	$config = shift;
+
+	IdaliusConfig::assert_dict($config, $self, "triggers");
+
 	return $self;
 }
 

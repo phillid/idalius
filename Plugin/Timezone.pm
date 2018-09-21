@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use DateTime;
+use IdaliusConfig qw/assert_dict/;
 
 my $config;
 
@@ -12,6 +13,8 @@ sub configure {
 	my $cmdref = shift;
 	shift; # run_command
 	$config = shift;
+
+	IdaliusConfig::assert_dict($config, $self, "timezone");
 
 	$cmdref->("time", sub { $self->time(@_); } );
 

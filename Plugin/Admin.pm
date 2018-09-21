@@ -3,6 +3,8 @@ package Plugin::Admin;
 use strict;
 use warnings;
 
+use IdaliusConfig qw/assert_scalar assert_list/;
+
 my $config;
 
 sub configure {
@@ -10,6 +12,10 @@ sub configure {
 	my $cmdref = shift;
 	shift; # run_command
 	$config = shift;
+
+	IdaliusConfig::assert_list($config, $self, "admins");
+	IdaliusConfig::assert_scalar($config, $self, "must_id");
+	IdaliusConfig::assert_scalar($config, $self, "quit_msg");
 
 	$cmdref->("say", sub { $self->say(@_); } );
 	$cmdref->("action", sub { $self->do_action(@_); } );
