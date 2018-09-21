@@ -7,10 +7,10 @@ sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 
-	$cmdref->("thanks", sub { $self->thanks(@_); } );
-	$cmdref->("thanks.", sub { $self->thanks(@_); } );
-	$cmdref->("thanks!", sub { $self->thanks(@_); } );
-	$cmdref->("thanks?", sub { $self->thanks(@_); } );
+	$cmdref->($self, "thanks", sub { $self->thanks(@_); } );
+	$cmdref->($self, "thanks.", sub { $self->thanks(@_); } );
+	$cmdref->($self, "thanks!", sub { $self->thanks(@_); } );
+	$cmdref->($self, "thanks?", sub { $self->thanks(@_); } );
 
 	return $self;
 }

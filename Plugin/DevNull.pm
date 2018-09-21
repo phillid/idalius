@@ -10,8 +10,8 @@ sub configure {
 	my $cmdref = shift;
 	$run_command = shift;
 
-	$cmdref->("hush", sub { $self->hush(@_); } );
-	$cmdref->("devnull", sub { $self->hush(@_); } );
+	$cmdref->($self, "hush", sub { $self->hush(@_); } );
+	$cmdref->($self, "devnull", sub { $self->hush(@_); } );
 
 	return $self;
 }

@@ -7,7 +7,7 @@ sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 
-	$cmdref->("echo", sub { $self->echo(@_); } );
+	$cmdref->($self, "echo", sub { $self->echo(@_); } );
 
 	return $self;
 }

@@ -16,7 +16,7 @@ sub configure {
 
 	IdaliusConfig::assert_dict($config, $self, "timezone");
 
-	$cmdref->("time", sub { $self->time(@_); } );
+	$cmdref->($self, "time", sub { $self->time(@_); } );
 
 	return $self;
 }

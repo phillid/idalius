@@ -4,34 +4,42 @@ use strict;
 use warnings;
 
 use IdaliusConfig qw/assert_scalar assert_list/;
+use Plugin qw/load_plugin unload_plugin/;
 
 my $config;
+my $root_config;
 
 sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 	shift; # run_command
 	$config = shift;
+	$root_config = shift;
 
 	IdaliusConfig::assert_list($config, $self, "admins");
 	IdaliusConfig::assert_scalar($config, $self, "must_id");
 	IdaliusConfig::assert_scalar($config, $self, "quit_msg");
 
-	$cmdref->("say", sub { $self->say(@_); } );
-	$cmdref->("action", sub { $self->do_action(@_); } );
+	$cmdref->($self, "say", sub { $self->say(@_); } );
+	$cmdref->($self, "action", sub { $self->do_action(@_); } );
 
-	$cmdref->("nick", sub { $self->nick(@_); } );
-	$cmdref->("join", sub { $self->join_channel(@_); } );
-	$cmdref->("part", sub { $self->part(@_); } );
-	$cmdref->("mode", sub { $self->mode(@_); } );
-	$cmdref->("kick", sub { $self->kick(@_); } );
-	$cmdref->("topic", sub { $self->topic(@_); } );
-	$cmdref->("reconnect", sub { $self->reconnect(@_); } );
+	$cmdref->($self, "nick", sub { $self->nick(@_); } );
+	$cmdref->($self, "join", sub { $self->join_channel(@_); } );
+	$cmdref->($self, "part", sub { $self->part(@_); } );
+	$cmdref->($self, "mode", sub { $self->mode(@_); } );
+	$cmdref->($self, "kick", sub { $self->kick(@_); } );
+	$cmdref->($self, "topic", sub { $self->topic(@_); } );
+	$cmdref->($self, "reconnect", sub { $self->reconnect(@_); } );
 
-	$cmdref->("ignore", sub { $self->ignore(@_); } );
-	$cmdref->("don't ignore", sub { $self->do_not_ignore(@_); } );
-	$cmdref->("who are you ignoring?", sub { $self->dump_ignore(@_); } );
-	$cmdref->("exit", sub { $self->exit(@_); } );
+	$cmdref->($self, "ignore", sub { $self->ignore(@_); } );
+	$cmdref->($self, "don't ignore", sub { $self->do_not_ignore(@_); } );
+	$cmdref->($self, "who are you ignoring?", sub { $self->dump_ignore(@_); } );
+
+	$cmdref->($self, "exit", sub { $self->exit(@_); } );
+
+	$cmdref->($self, "plugins", sub { $self->dump_plugins(@_); } );
+	$cmdref->($self, "load", sub { $self->load_plugin(@_); } );
+	$cmdref->($self, "unload", sub { $self->unload_plugin(@_); } );
 
 	return $self;
 }
@@ -196,6 +204,37 @@ sub exit {
 	return "Syntax: exit" unless @arguments == 0;
 
 	exit;
+}
+
+sub dump_plugins {
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	return "Active plugins: " . join ", ", @{$root_config->{plugins}};
+}
+
+sub unload_plugin {
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+
+	return unless is_admin($logger, $who, $ided);
+	return "Syntax: unload <plugin>" unless @arguments == 1;
+
+	my $module = $arguments[0];
+
+	my $error = Plugin::unload_plugin($logger, $root_config, $module);
+	return $error if $error;
+	return "$module unloaded";
+}
+
+sub load_plugin {
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+
+	return unless is_admin($logger, $who, $ided);
+	return "Syntax: load <plugin>" unless @arguments == 1;
+
+	my $module = $arguments[0];
+
+	my $error = Plugin::load_plugin($logger, $root_config, $module);
+	return $error if $error;
+	return "$module loaded";
 }
 
 1;

@@ -12,7 +12,7 @@ sub configure {
 	my $cmdref = shift;
 	$run_command = shift;
 
-	$cmdref->("map", sub { $self->map(@_); } );
+	$cmdref->($self, "map", sub { $self->map(@_); } );
 
 	return $self;
 }

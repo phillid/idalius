@@ -7,7 +7,7 @@ sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 
-	$cmdref->("ping", sub { $self->ping(@_); } );
+	$cmdref->($self, "ping", sub { $self->ping(@_); } );
 
 	return $self;
 }

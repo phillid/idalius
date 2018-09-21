@@ -7,7 +7,7 @@ sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 	my @source_commands = ("guts", "help", "source");
-	$cmdref->($_, sub { $self->source(@_); }) for @source_commands;
+	$cmdref->($self, $_, sub { $self->source(@_); }) for @source_commands;
 	return $self;
 }
 

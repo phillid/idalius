@@ -9,8 +9,8 @@ sub configure {
 	my $self = shift;
 	my $cmdref = shift;
 
-	$cmdref->("shuffle", sub { $self->shuffle(@_); } );
-	$cmdref->("choose", sub { $self->choose(@_); } );
+	$cmdref->($self, "shuffle", sub { $self->shuffle(@_); } );
+	$cmdref->($self, "choose", sub { $self->choose(@_); } );
 
 	return $self;
 }
