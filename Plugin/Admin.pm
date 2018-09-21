@@ -208,7 +208,7 @@ sub exit {
 
 sub dump_plugins {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
-	return "Active plugins: " . join ", ", @{$root_config->{plugins}};
+	return "Active plugins: " . join ", ", @{$root_config->{active_plugins}};
 }
 
 sub unload_plugin {
