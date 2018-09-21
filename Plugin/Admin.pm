@@ -128,7 +128,10 @@ sub mode {
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: mode <everything>" unless @arguments > 0;
 
-	# FIXME should use $where if it's a channel (?)
+	if (not is_channel($arguments[0] and is_channel($where->[0]))) {
+		$rest = "$where->[0] $rest";
+	}
+
 	$irc->yield(mode => $rest);
 }
 
