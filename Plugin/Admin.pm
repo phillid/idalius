@@ -45,7 +45,7 @@ sub configure {
 }
 
 sub is_channel {
-	return @_[0] =~ m/^#+/;
+	return $_[0] =~ m/^#+/;
 }
 
 sub is_admin {
