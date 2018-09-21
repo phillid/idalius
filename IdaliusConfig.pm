@@ -14,35 +14,29 @@ sub config_describe {
 	return "$plugin -> $parm";
 }
 
-sub assert_scalar {
-	my ($config, $plugin, $parm) = @_;
+sub assert_common {
+	my ($config, $plugin, $parm, $human_type, $ref_type) = @_;
 	my $ref = $config->{$parm};
 	my $name = config_describe($plugin, $parm);
 
-	die "Error: Configuration \"$name\" must be scalar" unless
+	die "Error: Configuration \"$name\" must be of type $human_type" unless
 		defined $ref
-		and ref($ref) eq "";
+		and ref($ref) eq $ref_type;
+}
+
+sub assert_scalar {
+	my ($config, $plugin, $parm) = @_;
+	assert_common($config, $plugin, $parm, "scalar", "");
 }
 
 sub assert_list {
 	my ($config, $plugin, $parm) = @_;
-	my $ref = $config->{$parm};
-	my $name = config_describe($plugin, $parm);
-
-	die "Error: Configuration \"$name\" must be list" unless
-		defined $ref
-		and ref($ref) eq "ARRAY";
+	assert_common($config, $plugin, $parm, "list", "ARRAY");
 }
 
 sub assert_dict {
 	my ($config, $plugin, $parm) = @_;
-	my $ref = $config->{$parm};
-	my $name = config_describe($plugin, $parm);
-
-	die "Error: Configuration \"$name\" must be dictionary" unless
-		defined $ref
-		and ref($ref) eq "HASH";
-
+	assert_common($config, $plugin, $parm, "dictionary", "HASH");
 }
 
 # Check presence and/or sanity of config parameters for the bot's core
