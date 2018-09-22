@@ -106,13 +106,15 @@ sub join_channel {
 sub part {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
+	$where = $where->[0] if ref($where) eq "ARRAY";
+
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: part <channel1> [channel2 ...] [partmsg]" unless
-		is_channel($where->[0]) or
+		is_channel($where) or
 		(@arguments >= 1 and is_channel($arguments[0]));
 
-	if ((@arguments == 0 and is_channel($where->[0])) or @arguments >= 1 and not is_channel($arguments[0])) {
-		$rest = "$where->[0] $rest";
+	if ((@arguments == 0 and is_channel($where)) or @arguments >= 1 and not is_channel($arguments[0])) {
+		$rest = "$where $rest";
 	}
 
 	my $nick = (split /!/, $who)[0];
@@ -125,11 +127,13 @@ sub part {
 sub mode {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
+	$where = $where->[0] if ref($where) eq "ARRAY";
+
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: mode <everything>" unless @arguments > 0;
 
-	if (not is_channel($arguments[0] and is_channel($where->[0]))) {
-		$rest = "$where->[0] $rest";
+	if (not is_channel($arguments[0]) and is_channel($where)) {
+		$rest = "$where $rest";
 	}
 
 	$irc->yield(mode => $rest);
@@ -138,13 +142,15 @@ sub mode {
 sub kick {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
+	$where = $where->[0] if ref($where) eq "ARRAY";
+
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: kick <channel> <nick> [reason]" unless
 		@arguments >= 2 and is_channel($arguments[0])
-		or @arguments >= 1 and is_channel($where->[0]);
+		or @arguments >= 1 and is_channel($where);
 
-	if (is_channel($where->[0]) and not is_channel($arguments[0])) {
-		$rest = "$where->[0] $rest";
+	if (is_channel($where) and not is_channel($arguments[0])) {
+		$rest = "$where $rest";
 	}
 
 	my ($channel, $kickee, undef, $reason) = $rest =~ /^(\S+)\s(\S+)((?:\s)(.*))?$/;
