@@ -83,9 +83,9 @@ sub parse_list {
 			my $item = substr($input, $item_i, $i - $item_i);
 			$item =~ s/^\s+|\s+$//g;
 			if ($is_hash) {
-				# FIXME should we die on duplicate keys or no?
 				my ($error, $key, $value) = parse_mapping($item);
 				die $error if $error;
+				die "Error: duplicate key \"$key\"" if grep {$_ eq $key} (keys %h_res);
 				$h_res{$key} = $value;
 			} else {
 				push @a_res, $item;
