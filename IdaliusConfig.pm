@@ -65,6 +65,14 @@ sub check_config
 
 }
 
+sub parse_die {
+	my ($supplementary, $from, $to, $line) = @_;
+	my $pad = " " x ($from + 1);
+	my $underline = "^" x ($to - $from + 1);
+
+	die "$supplementary:\n$line\n$pad$underline\n";
+}
+
 sub parse_config
 {
 	my $file = $_[0];
@@ -76,12 +84,12 @@ sub parse_config
 			# Detect list or hash config option
 			my $c = substr $config->{$section}->{$opt}, 0, 1;
 			if ($c eq "[") {
-				my ($error, @listified) = ListParser::parse_list($config->{$section}->{$opt}, 0);
-				die $error if $error;
+				my (($error, $from, $to), @listified) = ListParser::parse_list($config->{$section}->{$opt}, 0);
+				parse_die ($error, $from, $to, $config->{$section}->{$opt}) if $error;
 				$config->{$section}->{$opt} = \@listified;
 			} elsif ($c eq "{") {
-				my ($error, %hashified) = ListParser::parse_list($config->{$section}->{$opt}, 1);
-				die $error if $error;
+				my (($error, $from, $to), %hashified) = ListParser::parse_list($config->{$section}->{$opt}, 1);
+				parse_die ($error, $from, $to, $config->{$section}->{$opt}) if $error;
 				$config->{$section}->{$opt} = \%hashified;
 			}
 		}

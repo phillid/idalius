@@ -24,7 +24,7 @@ sub map {
 
 	return "Syntax: map command [item1, item2, ...]" unless $command and $subjects_raw;
 
-	my ($e, @subjects) = ListParser::parse_list($subjects_raw);
+	my ($e, $from, $to, @subjects) = ListParser::parse_list($subjects_raw);
 	return $e if $e;
 
 	my @results = map { $run_command->("$command $_", $who, $where, $ided) } @subjects;
