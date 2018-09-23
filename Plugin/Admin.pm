@@ -191,7 +191,7 @@ sub ignore {
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: ignore <nick>" unless @arguments == 1;
 
-	push @{$config->{ignore}}, $arguments[0];
+	push @{$root_config->{ignore}}, $arguments[0];
 
 	return "Ignoring $arguments[0]";
 }
@@ -204,8 +204,8 @@ sub do_not_ignore {
 
 	my $target = $arguments[0];
 
-	if (grep { $_ eq $target} @{$config->{ignore}}) {
-		@{$config->{ignore}} = grep { $_ ne $target } @{$config->{ignore}};
+	if (grep { $_ eq $target} @{$root_config->{ignore}}) {
+		@{$root_config->{ignore}} = grep { $_ ne $target } @{$root_config->{ignore}};
 		return "No longer ignoring $target.";
 	} else {
 		return "I wasn't ignoring $target anyway.";
@@ -218,7 +218,7 @@ sub dump_ignore {
 	return "Syntax: who are you ignoring?" unless @arguments == 0;
 
 	# FIXME special case for empty ignore
-	return "I am ignoring: " . join ", ", @{$config->{ignore}};
+	return "I am ignoring: " . join ", ", @{$root_config->{ignore}};
 }
 
 sub exit {
