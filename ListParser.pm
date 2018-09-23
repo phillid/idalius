@@ -1,5 +1,13 @@
 package ListParser;
 
+sub parse_die {
+	my ($line, $column, $end_column, $supplementary) = @_;
+	my $pad = " " x $column;
+	my $underline = "^" x ($end_column - $column);
+
+	die "$supplementary:\n$line\n$pad$underline\n";
+}
+
 sub parse_mapping {
 	my ($input) = @_;
 	my $key, $value;
@@ -30,25 +38,25 @@ sub parse_mapping {
 			if ($c =~ /\s/) {
 				# allow whitespace
 			} elsif ($c eq "'") {
-				return ("Key/value must consist of single string", undef, undef) if defined $string_end;
+				return ("Key/value must consist of single string", $i, undef, undef) if defined $string_end;
 				$is_string = 1;
 				$string_start = $i + 1;
 			} elsif ($c eq "=") {
-				return ("Expected > after =, got $lookahead", undef, undef) unless $lookahead eq ">";
-				return ("Unexpected '=>'.", undef, undef) unless $is_key;
+				return ("Expected > after =, got $lookahead", $i, undef, undef) unless $lookahead eq ">";
+				return ("Unexpected '=>'.", $i, undef, undef) unless $is_key;
 				$i++;
 
 				$key = substr($input, $string_start, $string_end - $string_start);
 				$string_start = $string_end = undef;
 				$is_key = 0;
 			} else {
-				return ("Unexpected $c", undef, undef);
+				return ("Unexpected $c", $i, undef, undef);
 			}
 		}
 		$i++;
 	}
 
-	return (undef, $key, $value);
+	return (undef, $i, $key, $value);
 }
 
 sub parse_list {
@@ -83,9 +91,10 @@ sub parse_list {
 			my $item = substr($input, $item_i, $i - $item_i);
 			$item =~ s/^\s+|\s+$//g;
 			if ($is_hash) {
-				my ($error, $key, $value) = parse_mapping($item);
-				die $error if $error;
-				die "Error: duplicate key \"$key\"" if grep {$_ eq $key} (keys %h_res);
+				my ($error, $subcol, $key, $value) = parse_mapping($item);
+				$subcol += $item_i + 2;
+				parse_die($input, $item_i, $subcol, $error) if $error;
+				parse_die($input, $item_i, $subcol, "Error: duplicate key \"$key\"") if grep {$_ eq $key} (keys %h_res);
 				$h_res{$key} = $value;
 			} else {
 				push @a_res, $item;
