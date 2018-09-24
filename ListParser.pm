@@ -30,25 +30,36 @@ sub parse_mapping {
 			if ($c =~ /\s/) {
 				# allow whitespace
 			} elsif ($c eq "'") {
-				return (("Key/value must consist of single string", $string_start, $i)) if defined $string_end;
+				return { error => "Key/value must consist of single string",
+				         column_start => $string_start,
+				         column_end => $i } if defined $string_end;
 				$is_string = 1;
 				$string_start = $i + 1;
 			} elsif ($c eq "=") {
-				return (("Expected > after =, got $lookahead", $i + 1, $i + 1)) unless $lookahead eq ">";
-				return (("Unexpected '=>'.", $i, $i)) unless $is_key;
+				return { error => "Expected > after =, got $lookahead",
+				         column_start => $i + 1,
+				         column_end => $i + 1 } unless $lookahead eq ">";
+				return { error => "Unexpected '=>'.",
+				         column_start => $i,
+				         column_end => $i} unless $is_key;
 				$i++;
 
 				$key = substr($input, $string_start, $string_end - $string_start);
 				$string_start = $string_end = undef;
 				$is_key = 0;
 			} else {
-				return (("Unexpected $c", $i, $i));
+				return { error => "Unexpected $c",
+				         column_start => $i,
+				         column_end => $i };
 			}
 		}
 		$i++;
 	}
 
-	return ((undef, $i, $i), ($key, $value));
+	return { column_start => $i,
+	         column_end => $i,
+	         key => $key,
+	         value => $value };
 }
 
 sub parse_list {
@@ -65,7 +76,9 @@ sub parse_list {
 	# Level of nested lists, 1 being the minimum
 	my $nest = 1;
 
-	return (("Error: expected $c_start", $i, $i)) unless substr($input, $i, 1) eq $c_start;
+	return { error => "Error: expected $c_start",
+	         column_start => $i,
+	         column_end => $i } unless substr($input, $i, 1) eq $c_start;
 
 	$i++;
 	$item_i = $i;
@@ -83,12 +96,14 @@ sub parse_list {
 			my $item = substr($input, $item_i, $i - $item_i);
 			$item =~ s/^\s+|\s+$//g;
 			if ($is_hash) {
-				my (($error, $from, $to), ($key, $value)) = parse_mapping($item);
-				$from += $item_i;
-				$to += $item_i;
-				return (($error, $from, $to)) if $error;
-				return (("Error: duplicate key \"$key\"", $item_i, $to)) if grep {$_ eq $key} (keys %h_res);
-				$h_res{$key} = $value;
+				my $mapping = parse_mapping($item);
+				$mapping{column_start} += $item_i;
+				$mapping{column_end} += $item_i;
+				return $mapping if $mapping->{error};
+				return { error => "Error: duplicate key \"$mapping->{key}\"",
+				         column_start => $item_i,
+				         column_end => $mapping->{column_end} } if grep {$_ eq $mapping->{key}} (keys %h_res);
+				$h_res{$mapping->{key}} = $mapping->{value};
 			} else {
 				push @a_res, $item;
 			}
@@ -97,13 +112,17 @@ sub parse_list {
 		$i++;
 	}
 
-	return (("Error: expected $c_end, got end of line", $i, $i)) unless $nest == 0;
+	return { error => "Error: expected $c_end, got end of line",
+	         column_start => $i,
+	         column_end => $i } unless $nest == 0;
 
 	if ($i != length($input)) {
-		return (("Error: unexpected item in the bagging area (after '$c_end')", $i, $i));
+		return { error => "Error: unexpected item in the bagging area (after '$c_end')",
+		         column_start => $i,
+		         column_end => $i };
 	}
 
-	return ((undef, undef, undef), %h_res) if $is_hash;
-	return ((undef, undef, undef), @a_res);
+	return { hash => \%h_res } if $is_hash;
+	return { array => \@a_res };
 }
 1;

@@ -66,11 +66,11 @@ sub check_config
 }
 
 sub parse_die {
-	my ($supplementary, $from, $to, $line) = @_;
-	my $pad = " " x ($from + 1);
-	my $underline = "^" x ($to - $from + 1);
+	my ($parsed, $line) = @_;
+	my $pad = " " x ($parsed->{column_start} + 1);
+	my $underline = "^" x ($parsed->{column_end} - $parsed->{column_start} + 1);
 
-	die "$supplementary:\n$line\n$pad$underline\n";
+	die "$parsed->{error}:\n$line\n$pad$underline\n";
 }
 
 sub parse_config
@@ -84,13 +84,13 @@ sub parse_config
 			# Detect list or hash config option
 			my $c = substr $config->{$section}->{$opt}, 0, 1;
 			if ($c eq "[") {
-				my (($error, $from, $to), @listified) = ListParser::parse_list($config->{$section}->{$opt}, 0);
-				parse_die ($error, $from, $to, $config->{$section}->{$opt}) if $error;
-				$config->{$section}->{$opt} = \@listified;
+				my $parsed = ListParser::parse_list($config->{$section}->{$opt}, 0);
+				parse_die($parsed, $config->{$section}->{$opt}) if $parsed->{error};
+				$config->{$section}->{$opt} = $parsed->{array};
 			} elsif ($c eq "{") {
-				my (($error, $from, $to), %hashified) = ListParser::parse_list($config->{$section}->{$opt}, 1);
-				parse_die ($error, $from, $to, $config->{$section}->{$opt}) if $error;
-				$config->{$section}->{$opt} = \%hashified;
+				my $parsed = ListParser::parse_list($config->{$section}->{$opt}, 1);
+				parse_die($parsed, $config->{$section}->{$opt}) if $parsed->{error};
+				$config->{$section}->{$opt} = $parsed->{hash};
 			}
 		}
 	}
