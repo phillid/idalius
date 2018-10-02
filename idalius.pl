@@ -29,7 +29,7 @@ load_configure_all_plugins();
 
 $| = 1;
 
-my $current_nick = $config->{_}->{nick};
+$config->{_}->{current_nick} = $config->{_}->{nick};
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -138,7 +138,7 @@ sub run_command {
 }
 sub custom_ping {
 	my ($irc, $heap) = @_[KERNEL, HEAP];
-	$irc->yield(userhost => $current_nick);
+	$irc->yield(userhost => $config->{_}->{current_nick});
 	$irc->delay(custom_ping => $ping_delay);
 }
 
@@ -187,7 +187,7 @@ sub irc_001 {
 
 	log_info("Connected to server ", $heap->server_name());
 
-	$current_nick = $config->{_}->{nick};
+	$config->{_}->{current_nick} = $config->{_}->{nick};
 	$heap->yield(join => $_) for @{$config->{_}->{channels}};
 	$irc->delay(custom_ping => $ping_delay);
 	return;
@@ -196,15 +196,15 @@ sub irc_001 {
 sub irc_nick {
 	my ($who, $new_nick) = @_[ARG0 .. ARG1];
 	my $oldnick = (split /!/, $who)[0];
-	if ($oldnick eq $current_nick) {
-		$current_nick = $new_nick;
+	if ($oldnick eq $config->{_}->{current_nick}) {
+		$config->{_}->{current_nick} = $new_nick;
 	}
 	return;
 }
 
 sub irc_kick {
 	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
-	if ($kickee eq $current_nick) {
+	if ($kickee eq $config->{_}->{current_nick}) {
 		log_info("I was kicked by $kicker ($reason). Rejoining now.");
 		$irc->yield(join => $channel);
 	}
@@ -221,7 +221,7 @@ sub handle_common {
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
-	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$config->{_}->{current_nick}\E[:,]\s+//g ||
 	    $no_prefix_what =~ s/^$config->{_}->{prefix}//)) {
 		$output = run_command($no_prefix_what, $who, $where, $ided);
 		$irc->yield(privmsg => $where => $output) if $output;
