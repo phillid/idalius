@@ -43,6 +43,12 @@ sub choose_response {
 		return some("$nick: shush yourself", "shut up, $nick", "nou $nick", "sorry $nick", ":(");
 	} elsif ($what =~ /\b(fuck\s+(off?|you|u)|fucking)\b/i) {
 		return some("$nick: take your meds", "stop harassing me", "ease up on the drink, mate", "ooh big boy angry $nick has come out to play");
+	} elsif ($what =~ /\b(lol|g(g|j))\b/i) {
+		return some(":)", ":D");
+	} elsif ($what =~ /\bstop(|\s+it)\b/i) {
+		return some(":(", "fine", "whatever, dude", "god");
+	} elsif ($what =~ /\bhelp\b/i) {
+		return some("D:", "ono");
 	}
 	return;
 }
