@@ -23,8 +23,7 @@ sub configure {
 #};
 
 sub mention_odds {
-	return 1;
-#	return int(rand(3)) == 1;
+	return int(rand(2)) == 1;
 }
 
 sub some {
