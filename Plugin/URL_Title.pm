@@ -55,6 +55,11 @@ sub on_message
 		return;
 	}
 
+	if (not $response->{headers}->{"content-type"}) {
+		$logger->("No content-type in reponse header, not continuing");
+		return;
+	}
+
 	if (!($response->{headers}->{"content-type"} =~ m,(text/html|image/svg\+xml),)) {
 		$logger->("I don't think I can parse titles from $response->{headers}->{'content-type'} - stopping here");
 		return;
