@@ -32,12 +32,8 @@ sub some {
 	return $choices[rand(@choices)];
 }
 
-sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
-	my $nick = (split /!/, $who)[0];
-
-	return unless $what =~ /\b$root_config->{current_nick}\b/;
-	return unless mention_odds();
+sub choose_response {
+	my ($what, $nick) = @_;
 
 	if ($what =~ /\b(hi|hey|sup|morning|hello|hiya)\b/i) {
 		return some("hi $nick", "hey $nick", "sup $nick") . some("", ", how goes it?");
@@ -48,6 +44,23 @@ sub on_message {
 	} elsif ($what =~ /\b(fuck\s+(off?|you|u)|fucking)\b/i) {
 		return some("$nick: take your meds", "stop harassing me", "ease up on the drink, mate", "ooh big boy angry $nick has come out to play");
 	}
+	return;
+}
+
+sub on_message {
+	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my $nick = (split /!/, $who)[0];
+
+	if (ref($where) eq "ARRAY") {
+		$where = $where->[0];
+	}
+
+	return unless $what =~ /\b$root_config->{current_nick}\b/;
+	return unless mention_odds();
+
+	my $response = choose_response($what, $nick);
+	$irc->delay([privmsg => $where => $response], rand(10)) if $response;
+
 	return;
 }
 
