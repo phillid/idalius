@@ -25,15 +25,7 @@ sub log_info {
 
 Plugin::set_load_callback(\&module_loaded_callback);
 
-eval {
-	for my $module (@{$config->{_}->{plugins}}) {
-		Plugin::load_plugin(\&log_info, $config->{_}, $module);
-	}
-	1;
-} or do {
-	log_info "Error: failed to load module: $@";
-	die;
-};
+load_configure_all_plugins();
 
 $| = 1;
 
@@ -81,6 +73,18 @@ POE::Session->create(
 drop_priv();
 
 $poe_kernel->run();
+
+sub load_configure_all_plugins {
+	eval {
+		for my $module (@{$config->{_}->{plugins}}) {
+			Plugin::load_plugin(\&log_info, $config->{_}, $module);
+		}
+		1;
+	} or do {
+		log_info "Error: failed to load module: $@";
+		die;
+	};
+}
 
 sub module_loaded_callback {
 	my ($module) = @_;
@@ -283,20 +287,32 @@ sub irc_invite {
 	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config->{_}->{channels}});
 }
 
+sub reconnect {
+	my $reconnect_delay = 20;
+
+	log_info("Reconnecting in $reconnect_delay seconds");
+	sleep($reconnect_delay);
+
+	$irc->yield(connect => { });
+}
+
 sub irc_disconnected {
 	_default(@_); # Dump the message
+	my $reconnect_delay = 20;
+
 	$config = IdaliusConfig::parse_config($config_file);
-	$irc->yield(connect => { });
+	load_configure_all_plugins();
+	reconnect();
 }
 
 sub irc_error {
 	_default(@_); # Dump the message
-	$irc->yield(connect => { });
+	reconnect();
 }
 
 sub irc_socketerr {
 	_default(@_); # Dump the message
-	$irc->yield(connect => { });
+	reconnect();
 }
 
 sub _default {
