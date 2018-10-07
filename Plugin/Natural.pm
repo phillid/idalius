@@ -60,7 +60,7 @@ sub on_message {
 		$where = $where->[0];
 	}
 
-	return unless $what =~ /\b$root_config->{current_nick}\b/;
+	return unless $what =~ /\b\Q$root_config->{current_nick}\E\b/;
 	return unless mention_odds();
 
 	my $response = choose_response($what, $nick);
