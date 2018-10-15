@@ -28,7 +28,7 @@ sub on_message {
 	foreach (@expressions) {
 		my $e = $_;
 		while ($what =~ /($e)/gi) {
-			$responses{$-[0]} = $config->{triggers}->{$e};
+			$responses{$-[0]} .= $config->{triggers}->{$e};
 		}
 	}
 	$gathered .= $responses{$_} foreach (sort { $a <=> $b } (keys %responses));
