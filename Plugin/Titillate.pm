@@ -22,19 +22,17 @@ sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $gathered = "";
 	my @expressions = (keys %{$config->{triggers}});
-	my $expression = join '|', @expressions;
-	while ($what =~ /($expression)/gi) {
-		my $matched = $1;
-		my $key;
-		# figure out which key matched
-		foreach (@expressions) {
-			if ($matched =~ /$_/i) {
-				$key = $_;
-				last;
-			}
+	my %responses;
+
+	# FIXME still doesn't support overlap like 'foo' with 'fooo'
+	foreach (@expressions) {
+		my $e = $_;
+		while ($what =~ /($e)/gi) {
+			$responses{$-[0]} = $config->{triggers}->{$e};
 		}
-		$gathered .= $config->{triggers}->{$key};
 	}
+	$gathered .= $responses{$_} foreach (sort { $a <=> $b } (keys %responses));
+
 	return $gathered;
 }
 
