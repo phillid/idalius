@@ -217,7 +217,7 @@ sub handle_common {
 	my $channel = $where->[0];
 	my $output;
 
-	$what =~ s/^\s+|\s+$//g;
+	$what =~ s/\s+$//g;
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
