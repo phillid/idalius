@@ -34,7 +34,7 @@ sub time {
 	if ($case_nick) {
 		my $d = DateTime->now();
 		$d->set_time_zone($config->{timezone}->{$case_nick});
-		my $timestr = $d->strftime("%Y-%m-%d %H:%M %Z");
+		my $timestr = $d->strftime("%H:%M on %a %d %b, %Y (%Z)");
 		return "$requester: $nick\'s clock reads $timestr";
 	} else {
 		return "$requester: I don't know what timezone $nick is in";
