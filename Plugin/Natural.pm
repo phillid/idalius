@@ -16,12 +16,6 @@ sub configure {
 	return $self;
 }
 
-#my %language {
-#	qr/(hi|hello|hey|hiya|morning|sup)/ => ("hey", "how goes it?", "hi")
-#	qr/(thx|thanks|thank you)/ => ("no problem", "you're welcome"),
-#	qr/help/                   => ("oh no")
-#};
-
 sub mention_odds {
 	return int(rand(2)) == 1;
 }
