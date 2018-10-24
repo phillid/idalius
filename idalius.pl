@@ -222,7 +222,7 @@ sub handle_common {
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
 	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$config->{_}->{current_nick}\E[:,]\s+//g ||
-	    $no_prefix_what =~ s/^$config->{_}->{prefix}//)) {
+	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
 		$output = run_command($no_prefix_what, $who, $where, $ided);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;

@@ -34,12 +34,16 @@ sub configure {
 	$cmdref->($self, "ignore", sub { $self->ignore(@_); } );
 	$cmdref->($self, "don't ignore", sub { $self->do_not_ignore(@_); } );
 	$cmdref->($self, "who are you ignoring?", sub { $self->dump_ignore(@_); } );
+	$cmdref->($self, "prefix rm", sub { $self->prefix_rm(@_); } );
+	$cmdref->($self, "prefix del", sub { $self->prefix_rm(@_); } );
+	$cmdref->($self, "prefix set", sub { $self->prefix_set(@_); } );
 
 	$cmdref->($self, "exit", sub { $self->exit(@_); } );
 
 	$cmdref->($self, "plugins", sub { $self->dump_plugins(@_); } );
 	$cmdref->($self, "load", sub { $self->load_plugin(@_); } );
 	$cmdref->($self, "unload", sub { $self->unload_plugin(@_); } );
+
 
 	return $self;
 }
@@ -219,6 +223,27 @@ sub dump_ignore {
 
 	# FIXME special case for empty ignore
 	return "I am ignoring: " . join ", ", @{$root_config->{ignore}};
+}
+
+sub prefix_rm {
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+
+	return "Syntax: prefix rm" unless @arguments == 0;
+
+	my $old = $root_config->{prefix};
+	$root_config->{prefix} = undef;
+
+	return "Prefix removed (used to be $old)" if $old;
+	return "Prefix was already removed";
+}
+
+sub prefix_set {
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+
+	return "Syntax: prefix set <new prefix>" unless @arguments > 0;
+
+	$root_config->{prefix} = $rest;
+	return "Prefix set to $root_config->{prefix}";
 }
 
 sub exit {
