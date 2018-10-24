@@ -17,7 +17,11 @@ sub configure {
 }
 
 sub mention_odds {
-	return int(rand(2)) == 1;
+	return int(rand(10)) < 9;
+}
+
+sub normal_odds {
+	return int(rand(10)) < 6;
 }
 
 sub some {
@@ -25,7 +29,7 @@ sub some {
 	return $choices[rand(@choices)];
 }
 
-sub choose_response {
+sub choose_mention_response {
 	my ($what, $nick) = @_;
 
 	if ($what =~ /\b(hi|hey|sup|morning|hello|hiya)\b/i) {
@@ -46,6 +50,29 @@ sub choose_response {
 	return;
 }
 
+sub choose_normal_response {
+	my ($what, $nick) = @_;
+
+	if ($what =~ /\b(hi|hey|sup|morning|hello|hiya)\b/i) {
+		return some("hi", "hello", "hellooooo", "hey") . some("", ", how are ya");
+	} elsif ($what =~ /\boof\b/i) {
+		return "ouch";
+	} elsif ($what =~ /\bouch\b/i) {
+		return some("owie", ":(");
+	} elsif ($what =~ /(\b(ow|owie|yow|yowie|ouchie)\b|(:\(|:'\())/i) {
+		return some("oh no!", "*hugs $nick", "*bakes a cake for $nick");
+	} elsif ($what =~ /\b(lol\b|kek\b|lel\b|lolol|haha|hehe|jaja)/i) {
+		return some(":)", ":D", "hehe");
+	} elsif ($what =~ /\b(:o)\b/i) {
+		return some("?", "ö", ":O", "!!");
+	} elsif ($what =~ /^help\b/i) {
+		return some("D:", "ono", "*throws a lifeline to $nick");
+	} elsif ($what =~ /(:D|:\)|D:|:\||:\/|:\\|:C|:S)/) {
+		return some(":D", ":)", "D:", ":|", ":/", ":\\", ":S", ">:D", ">:(", ">>>:CCCC");
+	}
+	return;
+}
+
 sub on_message {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
@@ -54,11 +81,22 @@ sub on_message {
 		$where = $where->[0];
 	}
 
-	return unless $what =~ /\b\Q$root_config->{current_nick}\E\b/;
-	return unless mention_odds();
+	my $response;
+	if ($what =~ /\b\Q$root_config->{current_nick}\E\b/) {
+		return unless mention_odds();
+		$response = choose_mention_response($what, $nick);
+	} else {
+		return unless normal_odds();
+		$response = choose_normal_response($what, $nick);
+	}
 
-	my $response = choose_response($what, $nick);
-	$irc->delay([privmsg => $where => $response], rand(10)) if $response;
+	return unless $response;
+
+	if (my ($rest) = ($response =~ m/^\*(.*)$/)) {
+		$irc->delay([ctcp => $where => "ACTION $rest"], 1+rand(9));
+	} else {
+		$irc->delay([privmsg => $where => $response], 1+rand(9));
+	}
 
 	return;
 }
