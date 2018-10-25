@@ -228,6 +228,8 @@ sub dump_ignore {
 sub prefix_rm {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
 
+	return unless is_admin($logger, $who, $ided);
+
 	return "Syntax: prefix rm" unless @arguments == 0;
 
 	my $old = $root_config->{prefix};
@@ -239,6 +241,8 @@ sub prefix_rm {
 
 sub prefix_set {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+
+	return unless is_admin($logger, $who, $ided);
 
 	return "Syntax: prefix set <new prefix>" unless @arguments > 0;
 
