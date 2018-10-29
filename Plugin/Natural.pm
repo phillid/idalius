@@ -61,7 +61,7 @@ sub choose_normal_response {
 		return some("owie", ":(");
 	} elsif ($what =~ /(\b(ow|owie|yow|yowie|ouchie)\b|(:\(|:'\())/i) {
 		return some("oh no!", "*hugs $nick", "*bakes a cake for $nick");
-	} elsif ($what =~ /\b(lol\b|kek\b|lel\b|lolol|haha|hehe|jaja)/i) {
+	} elsif ($what =~ /^\b(lol\b|kek\b|lel\b|lolol|haha|hehe|jaja)$/i) {
 		return some(":)", ":D", "hehe");
 	} elsif ($what =~ /\b(:o)\b/i) {
 		return some("?", "ö", ":O", "!!");
@@ -69,6 +69,10 @@ sub choose_normal_response {
 		return some("D:", "ono", "*throws a lifeline to $nick");
 	} elsif ($what =~ /(:D|:\)|D:|:\||:\\|:C|:S)/) {
 		return some(":D", ":)", "D:", ":|", ":/", ":\\", ":S", ">:D", ">:(", ">>>:CCCC");
+	} elsif ($what =~ /^o\/$/) {
+		return "\\o";
+	} elsif ($what =~ /^\\o$/) {
+		return "o/";
 	}
 	return;
 }
