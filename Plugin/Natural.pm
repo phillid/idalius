@@ -69,9 +69,9 @@ sub choose_normal_response {
 		return some("D:", "ono", "*throws a lifeline to $nick");
 	} elsif ($what =~ /(:D|:\)|D:|:\||:\\|:C|:S)/) {
 		return some(":D", ":)", "D:", ":|", ":/", ":\\", ":S", ">:D", ">:(", ">>>:CCCC");
-	} elsif ($what =~ /^o\/$/) {
+	} elsif ($what eq "o/") {
 		return "\\o";
-	} elsif ($what =~ /^\\o$/) {
+	} elsif ($what eq "\\o") {
 		return "o/";
 	}
 	return;
