@@ -17,12 +17,18 @@ sub load_plugin {
 
 	eval {
 		require $path . ".pm";
-		push @{$config->{active_plugins}}, $module;
 	} or do {
 		chomp $@;
 		$logger->($@);
 		return "Cannot load $module: $!";
 	};
+
+	if (not $module->can("configure")) {
+		$logger->("Loaded $module but it can't be configured. Probably not a module for us");
+		return "Can't configure $module. It probably isn't a module for me. Unloaded it.";
+	}
+
+	push @{$config->{active_plugins}}, $module;
 	$load_callback->($module);
 	return undef;
 }
