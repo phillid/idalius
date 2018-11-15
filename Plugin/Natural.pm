@@ -3,26 +3,32 @@ package Plugin::Natural;
 use strict;
 use warnings;
 
+my $config;
 my $root_config;
 
 sub configure {
 	my $self = shift;
 	shift; # cmdref
 	shift; # run_command
-	shift; # module config
+	$config = shift;
 	$root_config = shift;
+
+	IdaliusConfig::assert_scalar($config, $self, "chance_mentioned");
+	IdaliusConfig::assert_scalar($config, $self, "chance_otherwise");
+	die "chance_mentioned must be from 0 to 100"
+		if ($config->{chance_mentioned} < 0 || $config->{chance_mentioned} > 100);
+	die "chance_otherwise must be from 0 to 100"
+		if ($config->{chance_otherwise} < 0 || $config->{chance_otherwise} > 100);
 
 	return $self;
 }
 
-# FIXME make configurable
 sub mention_odds {
-	return int(rand(10)) < 9;
+	return int(rand(100)) < $config->{chance_mentioned};
 }
 
-# FIXME make configurable
 sub normal_odds {
-	return int(rand(10)) < 6;
+	return int(rand(100)) < $config->{chance_otherwise};
 }
 
 # FIXME factor out with other modules
