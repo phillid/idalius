@@ -67,6 +67,8 @@ POE::Session->create(
 			irc_disconnected
 			irc_error
 			irc_socketerr
+			irc_delay_set
+			irc_delay_removed
 			custom_ping) ],
 	],
 	heap => { irc => $irc },
@@ -335,6 +337,13 @@ sub irc_error {
 sub irc_socketerr {
 	_default(@_); # Dump the message
 	reconnect();
+}
+
+sub irc_delay_set {
+	# nop, silence this
+}
+sub irc_delay_removed {
+	# nop, silence this
 }
 
 sub _default {
