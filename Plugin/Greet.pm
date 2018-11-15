@@ -1,24 +1,39 @@
 package Plugin::Greet;
 
 # FIXME add configurable messages
-# FIXME add configurable chance of replying
-# FIXME factor out `some` with other plugins
 
 use strict;
 use warnings;
 
+my $config;
 my $root_config;
 
 sub configure {
 	my $self = shift;
 	shift; # cmdref
 	shift; # run_command
-	shift; # module config
+	$config = shift;
 	$root_config = shift;
+
+	IdaliusConfig::assert_scalar($config, $self, "chance_self");
+	IdaliusConfig::assert_scalar($config, $self, "chance_other");
+	die "chance_self must be from 0 to 100"
+		if ($config->{chance_self} < 0 || $config->{chance_self} > 100);
+	die "chance_other must be from 0 to 100"
+		if ($config->{chance_other} < 0 || $config->{chance_other} > 100);
 
 	return $self;
 }
 
+sub self_odds {
+	return int(rand(100)) < $config->{chance_self};
+}
+
+sub other_odds {
+	return int(rand(100)) < $config->{chance_other};
+}
+
+# FIXME factor out `some` with other plugins
 sub some {
 	my @choices = @_;
 	return $choices[rand(@choices)];
@@ -42,8 +57,10 @@ sub on_join {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
 	if ($nick eq $root_config->{current_nick}) {
+		return unless self_odds();
 		return some @own_responses;
 	} else {
+		return unless other_odds();
 		return some(
 			"hi $nick",
 			"oh look, $nick is here",
