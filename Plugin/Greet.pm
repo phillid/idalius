@@ -1,5 +1,9 @@
 package Plugin::Greet;
 
+# FIXME add configurable messages
+# FIXME add configurable chance of replying
+# FIXME factor out `some` with other plugins
+
 use strict;
 use warnings;
 

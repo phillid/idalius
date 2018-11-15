@@ -2,7 +2,6 @@ package Plugin::Natural;
 
 use strict;
 use warnings;
-use threads;
 
 my $root_config;
 
@@ -16,14 +15,17 @@ sub configure {
 	return $self;
 }
 
+# FIXME make configurable
 sub mention_odds {
 	return int(rand(10)) < 9;
 }
 
+# FIXME make configurable
 sub normal_odds {
 	return int(rand(10)) < 6;
 }
 
+# FIXME factor out with other modules
 sub some {
 	my @choices = @_;
 	return $choices[rand(@choices)];

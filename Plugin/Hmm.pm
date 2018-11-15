@@ -2,7 +2,6 @@ package Plugin::Hmm;
 
 use strict;
 use warnings;
-use threads;
 
 my $root_config;
 my $config;
