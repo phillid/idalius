@@ -56,12 +56,13 @@ my @own_responses = (
 sub on_join {
 	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
+	my $response;
 	if ($nick eq $root_config->{current_nick}) {
 		return unless self_odds();
-		return some @own_responses;
+		$response = some @own_responses;
 	} else {
 		return unless other_odds();
-		return some(
+		$response = some(
 			"hi $nick",
 			"oh look, $nick is here",
 			"look who came crawling back",
@@ -71,5 +72,7 @@ sub on_join {
 			"Welcome to $where->[0], $nick. Leave your sanity at the door",
 			"I feel sick");
 	}
+	$irc->delay([privmsg => $where => $response], 1+rand(5));
+	return;
 }
 1;
