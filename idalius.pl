@@ -60,6 +60,8 @@ POE::Session->create(
 			irc_ctcp_action
 			irc_public
 			irc_msg
+			irc_join
+			irc_part
 			irc_invite
 			irc_nick
 			irc_disconnected
@@ -269,6 +271,26 @@ sub irc_public {
 	log_info("[$channel] $who: $what");
 
 	return handle_common("message", $who, $where, $what, $ided);
+}
+
+sub irc_join {
+	my ($who, $channel) = @_[ARG0 .. ARG1];
+	my @where = ($channel);
+	my $nick = ( split /!/, $who )[0];
+
+	log_info("[$channel] >>> $who joined");
+
+	return handle_common("join", $who, \@where, "");
+}
+
+sub irc_part {
+	my ($who, $channel, $why) = @_[ARG0 .. ARG2];
+	my $nick = ( split /!/, $who )[0];
+	my @where = ($channel);
+
+	log_info("[$channel] <<< $who left ($why)");
+
+	return handle_common("part", $who, \@where, $why);
 }
 
 sub irc_msg {
