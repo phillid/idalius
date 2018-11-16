@@ -23,7 +23,7 @@ sub on_message {
 		$where = $where->[0];
 	}
 
-	if ($what =~ /(\w+men\w+)/) {
+	if ($what =~ /(\w*men\w*)/) {
 		my ($w, $c, $target);
 		$w = $c = $target = $1;
 		$w =~ s/men/women/;
