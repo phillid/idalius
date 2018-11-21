@@ -24,7 +24,6 @@ sub on_message {
 	my @expressions = (keys %{$config->{triggers}});
 	my %responses;
 
-	# FIXME still doesn't support overlap like 'foo' with 'fooo'
 	foreach (@expressions) {
 		my $e = $_;
 		while ($what =~ /($e)/gi) {
