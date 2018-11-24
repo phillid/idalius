@@ -69,7 +69,7 @@ sub on_join {
 			"look at what the cat dragged in",
 			"$nick!!!!! guys!!!!!! $nick is here !!!!!!!!",
 			"weclome $nick",
-			"Welcome to $where->[0], $nick. Leave your sanity at the door",
+			"Welcome to $where, $nick. Leave your sanity at the door",
 			"I feel sick");
 	}
 	$irc->delay([privmsg => $where => $response], 1+rand(5));
