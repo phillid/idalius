@@ -27,7 +27,7 @@ sub some {
 }
 
 sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
 
 	# Don't perform this in q to users

@@ -54,10 +54,10 @@ my @own_responses = (
 );
 
 sub on_join {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
 	my $response;
-	if ($nick eq $root_config->{current_nick}) {
+	if ($nick eq $irc->nick_name()) {
 		return unless self_odds();
 		$response = some @own_responses;
 	} else {

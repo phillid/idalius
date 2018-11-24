@@ -16,7 +16,7 @@ sub configure {
 }
 
 sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 	my $nick = (split /!/, $who)[0];
 

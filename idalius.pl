@@ -11,6 +11,7 @@ use IdaliusConfig;
 use Plugin qw/load_plugin/;
 use IRC::Utils qw(strip_color strip_formatting);
 
+my $ignore_suffix = "_yes_really_even_from_ignored_nicks";
 my $config_file = "bot.conf";
 my $config = IdaliusConfig::parse_config($config_file);
 my %laststrike = ();
@@ -28,8 +29,6 @@ Plugin::set_load_callback(\&module_loaded_callback);
 load_configure_all_plugins();
 
 $| = 1;
-
-$config->{_}->{current_nick} = $config->{_}->{nick};
 
 # New PoCo-IRC object
 my $irc = POE::Component::IRC->spawn(
@@ -78,6 +77,9 @@ drop_priv();
 
 $poe_kernel->run();
 
+
+################################################################################
+# Helpers and module framework
 sub load_configure_all_plugins {
 	eval {
 		for my $module (@{$config->{_}->{plugins}}) {
@@ -140,9 +142,13 @@ sub run_command {
 	my $action = $commands{$owner}{$command};
 	return $action->($irc, \&log_info, $who, $where, $ided, $rest, @arguments);
 }
+
+# Send an effect-free client->server message as a form of ping to allegedly
+# help POE realise when a connection is down. It otherwise seems to not realise
+# a connection has fallen over otherwise.
 sub custom_ping {
 	my ($irc, $heap) = @_[KERNEL, HEAP];
-	$irc->yield(userhost => $config->{_}->{current_nick});
+	$irc->yield(userhost => $irc->nick_name());
 	$irc->delay(custom_ping => $ping_delay);
 }
 
@@ -177,6 +183,88 @@ sub should_ignore {
 	return grep {$_ eq $nick} @{$config->{_}->{ignore}};
 }
 
+sub reconnect {
+	my $reconnect_delay = 20;
+
+	log_info("Reconnecting in $reconnect_delay seconds");
+	sleep($reconnect_delay);
+
+	$irc->yield(connect => { });
+}
+
+
+################################################################################
+# Plugin event handling helpers
+sub handle_common {
+	my ($message_type, $who, $where, $what, $ided) = @_;
+	my $nick = (split /!/, $who)[0];
+	my $channel = $where->[0];
+	my $output;
+
+	$what =~ s/\s+$//g;
+
+	# Firstly, trigger commands
+	my $stripped_what = strip_color(strip_formatting($what));
+	my $no_prefix_what = $stripped_what;
+	my $current_nick = $irc->nick_name();
+	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
+		$output = run_command($no_prefix_what, $who, $where, $ided);
+		$irc->yield(privmsg => $where => $output) if $output;
+		strike_add($nick, $channel) if $output;
+	}
+
+	# Secondly, trigger non-command handlers
+	trigger_modules($message_type, $who, $where, ($who, $where, $what, $stripped_what));
+
+	return;
+}
+
+# Trigger applicable non-command-bound handlers in any active modules for
+# a given message type, passing them only the given arguments
+sub trigger_modules {
+	my ($message_type, $who, $where, @arguments) = @_;
+	my $nick = (split /!/, $who)[0];
+
+	for my $handler (handlers_for($message_type, $who)) {
+		my @base_args = (\&log_info);
+		push @base_args, @arguments;
+		push @base_args, $irc;
+		my $output = $handler->(@base_args);
+		if ($output and $where) {
+			$irc->yield(privmsg => $where => $output);
+			strike_add($nick, $where->[0]);
+		}
+	}
+	return;
+}
+
+# Return a list of subs capable of handling the given message type for a nick
+sub handlers_for {
+	my ($message_type, $nick) = @_;
+	my @handlers = ();
+	$nick = (split /!/, $nick)[0];
+
+	$message_type = "on_$message_type";
+	for my $module (@{$config->{_}->{active_plugins}}) {
+		if (module_is_enabled($module)) {
+			if (!should_ignore($nick) and $module->can($message_type)) {
+				# Leave message type unchanged
+			} elsif ($module->can($message_type.$ignore_suffix)) {
+				$message_type = $message_type.$ignore_suffix;
+			} else {
+				# No handler
+				next;
+			}
+			push @handlers, sub { $module->$message_type(@_); };
+		}
+	}
+	return @handlers;
+}
+
+
+###############################################################################
+# Begin internal/core handlers
 sub _start {
 	my $heap = $_[HEAP];
 	my $irc = $heap->{irc};
@@ -191,67 +279,8 @@ sub irc_001 {
 
 	log_info("Connected to server ", $heap->server_name());
 
-	$config->{_}->{current_nick} = $config->{_}->{nick};
 	$heap->yield(join => $_) for @{$config->{_}->{channels}};
 	$irc->delay(custom_ping => $ping_delay);
-	return;
-}
-
-sub irc_nick {
-	my ($who, $new_nick) = @_[ARG0 .. ARG1];
-	my $oldnick = (split /!/, $who)[0];
-	if ($oldnick eq $config->{_}->{current_nick}) {
-		$config->{_}->{current_nick} = $new_nick;
-	}
-	return;
-}
-
-sub irc_kick {
-	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
-	if ($kickee eq $config->{_}->{current_nick}) {
-		log_info("I was kicked by $kicker ($reason). Rejoining now.");
-		$irc->yield(join => $channel);
-	}
-	return;
-}
-
-sub handle_common {
-	my ($message_type, $who, $where, $what, $ided) = @_;
-	my $nick = (split /!/, $who)[0];
-	my $channel = $where->[0];
-	my $output;
-
-	$what =~ s/\s+$//g;
-
-	my $stripped_what = strip_color(strip_formatting($what));
-	my $no_prefix_what = $stripped_what;
-	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$config->{_}->{current_nick}\E[:,]\s+//g ||
-	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
-		$output = run_command($no_prefix_what, $who, $where, $ided);
-		$irc->yield(privmsg => $where => $output) if $output;
-		strike_add($nick, $channel) if $output;
-	}
-
-	# handler names are defined as being prefixed with on_
-	$message_type = "on_$message_type";
-	my $ignore_suffix = "_yes_really_even_from_ignored_nicks";
-	for my $module (@{$config->{_}->{active_plugins}}) {
-		if (module_is_enabled($module)) {
-			if (!should_ignore($nick) and $module->can($message_type)) {
-				# Leave message type unchanged
-			} elsif ($module->can($message_type.$ignore_suffix)) {
-				# Handler for non-ignored and ignored exists
-				$message_type = $message_type.$ignore_suffix;
-			} else {
-				# No handler
-				next;
-			}
-			$output = $module->$message_type(\&log_info, $irc->nick_name, $who, $where, $what, $stripped_what, $irc);
-			$irc->yield(privmsg => $where => $output) if $output;
-			strike_add($nick, $channel) if $output;
-		}
-	}
-
 	return;
 }
 
@@ -260,29 +289,22 @@ sub irc_ctcp_action {
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
 
-	log_info("[$channel] [action] $who $what");
-
-	return handle_common("action", $who, $where, $what);
+	handle_common("action", $who, $where, $what);
+	return;
 }
 
 sub irc_public {
 	my ($who, $where, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = ( split /!/, $who )[0];
 	my $channel = $where->[0];
-
-	log_info("[$channel] $who: $what");
-
-	return handle_common("message", $who, $where, $what, $ided);
+	handle_common("message", $who, $where, $what, $ided);
+	return;
 }
 
 sub irc_join {
 	my ($who, $channel) = @_[ARG0 .. ARG1];
-	my @where = ($channel);
-	my $nick = ( split /!/, $who )[0];
-
-	log_info("[$channel] >>> $who joined");
-
-	return handle_common("join", $who, \@where, "");
+	trigger_modules("join", $who, $channel, ($who, $channel));
+	return;
 }
 
 sub irc_part {
@@ -290,14 +312,50 @@ sub irc_part {
 	my $nick = ( split /!/, $who )[0];
 	my @where = ($channel);
 
-	log_info("[$channel] <<< $who left ($why)");
-
-	return handle_common("part", $who, \@where, $why);
+	trigger_modules("part", $who, $channel, ($who, $channel, $why));
+	return;
 }
+
+sub irc_kick {
+	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
+	trigger_modules("kick", $kicker, $channel, ($kicker, $channel, $kickee, $reason));
+	return;
+}
+
+sub irc_nick {
+	my ($who, $new_nick) = @_[ARG0 .. ARG1];
+	trigger_modules("nick", $who, undef, ($who, $new_nick));
+	return;
+}
+
+sub irc_invite {
+	my ($who, $where) = @_[ARG0 .. ARG1];
+	trigger_modules("invite", $who, undef, ($who, $where));
+	return;
+}
+
+# FIXME these need implementing even if just for logging:
+# irc_registered
+# irc_shutdown
+# irc_connected
+# irc_ctcp_*
+# irc_ctcpreply_*
+# irc_disconnected
+# irc_error
+# irc_mode
+# irc_notice
+# irc_quit
+# irc_socketerr
+# irc_topic
+# irc_whois
+# irc_whowas
 
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
+
+	# FIXME trigger plugins with on_msg or something. Currently no privmsg
+	# are logged, but Log.pm can do this for us.
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $output = run_command($stripped_what, $who, $nick, $ided);
@@ -306,19 +364,7 @@ sub irc_msg {
 	return;
 }
 
-sub irc_invite {
-	my ($who, $where) = @_[ARG0 .. ARG1];
-	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config->{_}->{channels}});
-}
-
-sub reconnect {
-	my $reconnect_delay = 20;
-
-	log_info("Reconnecting in $reconnect_delay seconds");
-	sleep($reconnect_delay);
-
-	$irc->yield(connect => { });
-}
+###############################################################################
 
 sub irc_disconnected {
 	_default(@_); # Dump the message

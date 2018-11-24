@@ -35,7 +35,7 @@ sub start_handler
 
 sub on_message
 {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $url;
 
 	# Drawn from RFC 3986§2

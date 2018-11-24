@@ -86,7 +86,7 @@ sub choose_normal_response {
 }
 
 sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $nick = (split /!/, $who)[0];
 
 	if (ref($where) eq "ARRAY") {
@@ -94,7 +94,7 @@ sub on_message {
 	}
 
 	my $response;
-	if ($what =~ /\b\Q$root_config->{current_nick}\E\b/) {
+	if ($what =~ /\b\Q$irc->nick_name()\E\b/) {
 		return unless mention_odds();
 		$response = choose_mention_response($what, $nick);
 	} else {

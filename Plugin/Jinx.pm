@@ -19,7 +19,7 @@ sub configure {
 }
 
 sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
 	return if $last_response{$channel} and lc $what eq lc $last_response{$channel};
@@ -35,7 +35,7 @@ sub on_message {
 }
 
 sub on_action {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
 	return if $last_response{$channel} and lc $what eq lc $last_response{$channel};
@@ -53,7 +53,7 @@ sub on_action {
 
 # Even ignored nicks should be allowed to break a streak
 sub on_message_yes_really_even_from_ignored_nicks {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $channel = $where->[0];
 
 	return if $last{$channel} and lc $last{$channel} eq lc $what;

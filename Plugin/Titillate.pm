@@ -19,7 +19,7 @@ sub configure {
 }
 
 sub on_message {
-	my ($self, $logger, $me, $who, $where, $raw_what, $what, $irc) = @_;
+	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	my $gathered = "";
 	my @expressions = (keys %{$config->{triggers}});
 	my %responses;
