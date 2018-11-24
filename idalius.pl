@@ -348,6 +348,10 @@ sub irc_delay_removed {
 
 sub _default {
 	my ($event, $args) = @_[ARG0 .. $#_];
+
+	# exit early unless in debug mode
+	return unless $config->{_}->{log_debug};
+
 	my @output = ( "$event: " );
 
 	for my $arg (@$args) {

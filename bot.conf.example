@@ -14,6 +14,7 @@ user     = nobody
 group    = nobody
 prefix_nick = 1
 prefix   = %
+log_debug = 0
 
 [Plugin::Admin]
 admins   = [ snargle!~kleg@glarg.example.com ]

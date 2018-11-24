@@ -47,7 +47,7 @@ sub check_config
 	my ($config) = @_;
 
 	# Lists of mandatory config variables 
-	my @scalars = qw/nick username ircname server port usessl sslcert sslkey user group prefix_nick prefix/;
+	my @scalars = qw/nick username ircname server port usessl sslcert sslkey user group prefix_nick prefix log_debug/;
 	my @lists   = qw/plugins channels ignore/;
 
 	foreach my $name (@scalars) {
