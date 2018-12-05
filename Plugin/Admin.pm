@@ -221,7 +221,7 @@ sub dump_ignore {
 
 	return "Syntax: who are you ignoring?" unless @arguments == 0;
 
-	# FIXME special case for empty ignore
+	return "I am ignoring nobody" unless @{$root_config->{ignore}};
 	return "I am ignoring: " . join ", ", @{$root_config->{ignore}};
 }
 
