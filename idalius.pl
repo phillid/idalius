@@ -180,7 +180,14 @@ sub strike_add {
 
 sub should_ignore {
 	my ($who) = @_;
-	return grep {$_ eq $who} @{$config->{_}->{ignore}};
+	for my $mask (@{$config->{_}->{ignore}}) {
+		my $expr = $mask;
+		$expr =~ s/\*/.*/g;
+		if ($who =~ /^$expr$/) {
+			return 1;
+		}
+	}
+	return;
 }
 
 sub reconnect {
