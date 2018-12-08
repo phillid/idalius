@@ -179,8 +179,8 @@ sub strike_add {
 }
 
 sub should_ignore {
-	my ($nick) = @_;
-	return grep {$_ eq $nick} @{$config->{_}->{ignore}};
+	my ($who) = @_;
+	return grep {$_ eq $who} @{$config->{_}->{ignore}};
 }
 
 sub reconnect {
@@ -207,7 +207,7 @@ sub handle_common {
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $no_prefix_what = $stripped_what;
 	my $current_nick = $irc->nick_name();
-	if (!should_ignore($nick) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
+	if (!should_ignore($who) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
 	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
 		$output = run_command($no_prefix_what, $who, $where, $ided);
 		$irc->yield(privmsg => $where => $output) if $output;
@@ -241,14 +241,14 @@ sub trigger_modules {
 
 # Return a list of subs capable of handling the given message type for a nick
 sub handlers_for {
-	my ($message_type, $nick) = @_;
+	my ($message_type, $who) = @_;
 	my @handlers = ();
-	$nick = (split /!/, $nick)[0];
+	my $nick = (split /!/, $who)[0];
 
 	$message_type = "on_$message_type";
 	for my $module (@{$config->{_}->{active_plugins}}) {
 		if (module_is_enabled($module)) {
-			if (!should_ignore($nick) and $module->can($message_type)) {
+			if (!should_ignore($who) and $module->can($message_type)) {
 				# Leave message type unchanged
 			} elsif ($module->can($message_type.$ignore_suffix)) {
 				$message_type = $message_type.$ignore_suffix;
