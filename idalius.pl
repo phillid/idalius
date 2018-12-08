@@ -147,7 +147,7 @@ sub run_command {
 # help POE realise when a connection is down. It otherwise seems to not realise
 # a connection has fallen over otherwise.
 sub custom_ping {
-	my ($poek) = @_[KERNEL];
+	my ($poek) = $_[KERNEL];
 	$poek->yield(userhost => $irc->nick_name());
 	$poek->delay(custom_ping => $ping_delay);
 }
