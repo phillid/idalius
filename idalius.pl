@@ -182,7 +182,7 @@ sub should_ignore {
 	my ($who) = @_;
 	for my $mask (@{$config->{_}->{ignore}}) {
 		my $expr = $mask;
-		$expr =~ s/([^[:alnum:]\*])/\\\1/g;
+		$expr =~ s/([^[:alnum:]\*])/$1/g;
 		$expr =~ s/\*/.*/g;
 		if ($who =~ /^$expr$/) {
 			return 1;
