@@ -72,7 +72,7 @@ sub on_message
 	my $p = HTML::Parser->new(api_version => 3);
 	$p->handler( start => \&start_handler, "tagname,self");
 	$p->parse($html);
-	die "Error: $!\n" if $!;
+	$logger->("Error parsing HTML: $!") if $!;
 
 	$title =~ s/\s+/ /g;
 	$title =~ s/(^\s+|\s+$)//g;
