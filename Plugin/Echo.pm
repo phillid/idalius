@@ -13,7 +13,7 @@ sub configure {
 }
 
 sub echo {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return $rest;
 }

@@ -117,7 +117,7 @@ sub register_command {
 }
 
 sub run_command {
-	my ($command_string, $who, $where, $ided) = @_;
+	my ($command_string, $who, $where, $ided, $no_reenter) = @_;
 	my @arguments;
 	my $owner;
 	my $command_verbatim;
@@ -140,7 +140,9 @@ sub run_command {
 	@arguments = split /\s+/, $rest if $rest;
 
 	my $action = $commands{$owner}{$command};
-	return $action->($irc, \&log_info, $who, $where, $ided, $rest, @arguments);
+	return $action->($irc, \&log_info, $who, $where, $ided, $rest,
+		sub { push @$no_reenter, $owner; },
+		@arguments);
 }
 
 # Send an effect-free client->server message as a form of ping to allegedly
@@ -209,6 +211,8 @@ sub handle_common {
 	my $channel = $where->[0];
 	my $output;
 
+	my @no_reenter = ();
+
 	$what =~ s/\s+$//g;
 
 	# Firstly, trigger commands
@@ -217,13 +221,13 @@ sub handle_common {
 	my $current_nick = $irc->nick_name();
 	if (!should_ignore($who) && ($config->{_}->{prefix_nick} && $no_prefix_what =~ s/^\Q$current_nick\E[:,]\s+//g ||
 	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
-		$output = run_command($no_prefix_what, $who, $where, $ided);
+		$output = run_command($no_prefix_what, $who, $where, $ided, \@no_reenter);
 		$irc->yield(privmsg => $where => $output) if $output;
 		strike_add($nick, $channel) if $output;
 	}
 
 	# Secondly, trigger non-command handlers
-	trigger_modules($message_type, $who, $where, ($who, $where, $what, $stripped_what));
+	trigger_modules($message_type, $who, $where, \@no_reenter, ($who, $where, $what, $stripped_what));
 
 	return;
 }
@@ -231,10 +235,10 @@ sub handle_common {
 # Trigger applicable non-command-bound handlers in any active modules for
 # a given message type, passing them only the given arguments
 sub trigger_modules {
-	my ($message_type, $who, $where, @arguments) = @_;
+	my ($message_type, $who, $where, $no_reenter, @arguments) = @_;
 	my $nick = (split /!/, $who)[0];
 
-	for my $handler (handlers_for($message_type, $who)) {
+	for my $handler (handlers_for($message_type, $who, $no_reenter)) {
 		my @base_args = (\&log_info);
 		push @base_args, @arguments;
 		push @base_args, $irc;
@@ -248,14 +252,15 @@ sub trigger_modules {
 }
 
 # Return a list of subs capable of handling the given message type for a nick
+# excluding those modules that have asked not to be reentered for this message
 sub handlers_for {
-	my ($message_type, $who) = @_;
+	my ($message_type, $who, $no_reenter) = @_;
 	my @handlers = ();
 	my $nick = (split /!/, $who)[0];
 
 	$message_type = "on_$message_type";
 	for my $module (@{$config->{_}->{active_plugins}}) {
-		if (module_is_enabled($module)) {
+		if (!(grep {$_ eq $module} @$no_reenter) and module_is_enabled($module)) {
 			if (!should_ignore($who) and $module->can($message_type)) {
 				# Leave message type unchanged
 			} elsif ($module->can($message_type.$ignore_suffix)) {
@@ -311,34 +316,39 @@ sub irc_public {
 
 sub irc_join {
 	my ($who, $channel) = @_[ARG0 .. ARG1];
-	trigger_modules("join", $who, $channel, ($who, $channel));
+	my @empty = ();
+	trigger_modules("join", $who, $channel, \@empty, ($who, $channel));
 	return;
 }
 
 sub irc_part {
 	my ($who, $channel, $why) = @_[ARG0 .. ARG2];
 	my $nick = ( split /!/, $who )[0];
+	my @empty = ();
 	my @where = ($channel);
 
-	trigger_modules("part", $who, $channel, ($who, $channel, $why));
+	trigger_modules("part", $who, $channel, \@empty, ($who, $channel, $why));
 	return;
 }
 
 sub irc_kick {
 	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
-	trigger_modules("kick", $kicker, $channel, ($kicker, $channel, $kickee, $reason));
+	my @empty = ();
+	trigger_modules("kick", $kicker, $channel, \@empty, ($kicker, $channel, $kickee, $reason));
 	return;
 }
 
 sub irc_nick {
 	my ($who, $new_nick) = @_[ARG0 .. ARG1];
-	trigger_modules("nick", $who, undef, ($who, $new_nick));
+	my @empty = ();
+	trigger_modules("nick", $who, undef, \@empty, ($who, $new_nick));
 	return;
 }
 
 sub irc_invite {
 	my ($who, $where) = @_[ARG0 .. ARG1];
-	trigger_modules("invite", $who, undef, ($who, $where));
+	my @empty = ();
+	trigger_modules("invite", $who, undef, \@empty, ($who, $where));
 	return;
 }
 

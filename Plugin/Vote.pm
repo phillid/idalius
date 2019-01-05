@@ -34,7 +34,7 @@ sub has_voted {
 }
 
 sub begin {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	my $channel = get_channel($where);
 	my $nick = (split /!/, $who)[0];
 
@@ -48,7 +48,7 @@ sub begin {
 }
 
 sub end {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	my $channel = get_channel($where);
 
 	return "No vote is in progress" unless $vote_topic{$channel};
@@ -60,7 +60,7 @@ sub end {
 }
 
 sub yes {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	my $nick = (split /!/, $who)[0];
 	my $channel = get_channel($where);
 
@@ -73,7 +73,7 @@ sub yes {
 }
 
 sub no {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	my $nick = (split /!/, $who)[0];
 	my $channel = get_channel($where);
 

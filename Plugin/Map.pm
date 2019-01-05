@@ -19,7 +19,7 @@ sub configure {
 
 
 sub map {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	my ($command, $subjects_raw) = ($rest =~ /^(.+)\s+(\[.*\])$/);
 
 	return "Syntax: map command [item1, item2, ...]" unless $command and $subjects_raw;

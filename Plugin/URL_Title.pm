@@ -98,12 +98,13 @@ sub get_title
 
 sub get_title_cmd
 {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	my ($title, $error) = get_title($rest);
 	$logger->($error) if $error;
 
 	return $error if $error;
+	$no_reenter->();
 	return $title if $title;
 
 }

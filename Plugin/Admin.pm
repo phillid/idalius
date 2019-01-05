@@ -66,7 +66,7 @@ sub is_admin {
 }
 
 sub nick {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: nick <new nick>" unless @arguments == 1;
@@ -75,7 +75,7 @@ sub nick {
 }
 
 sub say {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: say <channel> <msg>" unless @arguments >= 2;
@@ -87,7 +87,7 @@ sub say {
 }
 
 sub do_action {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: action <channel> <action text>" unless @arguments >= 2;
@@ -99,7 +99,7 @@ sub do_action {
 }
 
 sub join_channel {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: join <channel1> [channel2 ...]" unless @arguments >= 1;
@@ -108,7 +108,7 @@ sub join_channel {
 }
 
 sub part {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	$where = $where->[0] if ref($where) eq "ARRAY";
 
@@ -129,7 +129,7 @@ sub part {
 }
 
 sub mode {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	$where = $where->[0] if ref($where) eq "ARRAY";
 
@@ -144,7 +144,7 @@ sub mode {
 }
 
 sub kick {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	$where = $where->[0] if ref($where) eq "ARRAY";
 
@@ -166,7 +166,7 @@ sub kick {
 }
 
 sub topic {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: topic <new topic>" unless @arguments >= 2;
@@ -179,7 +179,7 @@ sub topic {
 }
 
 sub reconnect {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 
@@ -190,7 +190,7 @@ sub reconnect {
 }
 
 sub ignore {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: ignore <nick>" unless @arguments == 1;
@@ -201,7 +201,7 @@ sub ignore {
 }
 
 sub do_not_ignore {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: don't ignore <nick>" unless @arguments == 1;
@@ -217,7 +217,7 @@ sub do_not_ignore {
 }
 
 sub dump_ignore {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return "Syntax: who are you ignoring?" unless @arguments == 0;
 
@@ -226,7 +226,7 @@ sub dump_ignore {
 }
 
 sub prefix_rm {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 
@@ -240,7 +240,7 @@ sub prefix_rm {
 }
 
 sub prefix_set {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 
@@ -251,7 +251,7 @@ sub prefix_set {
 }
 
 sub exit {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: exit" unless @arguments == 0;
@@ -260,12 +260,12 @@ sub exit {
 }
 
 sub dump_plugins {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	return "Active plugins: " . join ", ", @{$root_config->{active_plugins}};
 }
 
 sub unload_plugin {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: unload <plugin>" unless @arguments == 1;
@@ -278,7 +278,7 @@ sub unload_plugin {
 }
 
 sub load_plugin {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
 	return "Syntax: load <plugin>" unless @arguments == 1;

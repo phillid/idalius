@@ -16,13 +16,13 @@ sub configure {
 }
 
 sub shuffle {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return join " ", List::Util::shuffle(@arguments);
 }
 
 sub choose {
-	my ($self, $irc, $logger, $who, $where, $ided, $rest, @arguments) = @_;
+	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 	return (List::Util::shuffle(@arguments))[0];
 }
 1;
