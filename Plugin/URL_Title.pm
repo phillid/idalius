@@ -53,8 +53,12 @@ sub get_title
 	my $response = $http->get($url);
 
 	if (!$response->{success}) {
-		chomp $response->{content};
-		return (undef, "Error: HTTP client: $response->{reason} ($response->{content})");
+		if ($response->{status} == 599) {
+			chomp $response->{content};
+			return (undef, "Error: HTTP client: $response->{content}");
+		} else {
+			return (undef, "Error: HTTP $response->{status} ($response->{reason})");
+		}
 	}
 
 	if (not $response->{headers}->{"content-type"}) {
