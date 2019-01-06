@@ -44,7 +44,7 @@ sub get_title
 	if ($what =~ /(https?:\/\/[a-z0-9\-\._~:\/\?#\[\]@\!\$&'()\*\+,;=%]+)/i) {
 		$url = $1;
 	}
-	return (undef, "No URL found in that string") unless $url;
+	return (undef, "No URL found in that string", undef) unless $url;
 
 	# FIXME add more XML-based formats that we can theoretically extract titles from
 	# FIXME factor out accepted formats and response match into accepted formats array
@@ -55,18 +55,18 @@ sub get_title
 	if (!$response->{success}) {
 		if ($response->{status} == 599) {
 			chomp $response->{content};
-			return (undef, "Error: HTTP client: $response->{content}");
+			return (undef, undef, "Error: HTTP client: $response->{content}");
 		} else {
-			return (undef, "Error: HTTP $response->{status} ($response->{reason})");
+			return (undef, undef, "Error: HTTP $response->{status} ($response->{reason})");
 		}
 	}
 
 	if (not $response->{headers}->{"content-type"}) {
-		return (undef, "No content-type in reponse header, not continuing");
+		return (undef, undef, "No content-type in reponse header, not continuing");
 	}
 
 	if (!($response->{headers}->{"content-type"} =~ m,(text/html|image/svg\+xml),)) {
-		return (undef, "I don't think I can parse titles from $response->{headers}->{'content-type'} - stopping here");
+		return (undef, undef, "I don't think I can parse titles from $response->{headers}->{'content-type'} - stopping here");
 	}
 
 	my $html = $response->{content};
@@ -76,13 +76,13 @@ sub get_title
 	my $p = HTML::Parser->new(api_version => 3);
 	$p->handler( start => \&start_handler, "tagname,self");
 	$p->parse($html);
-	return (undef, "Error parsing HTML: $!") if $!;
+	return (undef, undef, "Error parsing HTML: $!") if $!;
 
 	$title =~ s/\s+/ /g;
 	$title =~ s/(^\s+|\s+$)//g;
 
 	utf8::upgrade($title);
-	return (undef, "Error: No title") unless $title;
+	return (undef, undef, "Error: No title") unless $title;
 
 	my $shorturl = $url;
 	# remove http(s):// to avoid triggering other poorly configured bots
@@ -100,10 +100,11 @@ sub get_title_cmd
 {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
-	my ($title, $error) = get_title($rest);
+	my ($title, $warning, $error) = get_title($rest);
 	$logger->($error) if $error;
 
 	return $error if $error;
+	return $warning if $warning;
 	$no_reenter->();
 	return $title if $title;
 
@@ -113,7 +114,9 @@ sub on_message
 {
 	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 
-	my ($title, $error) = get_title($what);
+	my ($title, $warning, $error) = get_title($what);
+
+	# Log only errors, not warnings
 	$logger->($error) if $error;
 
 	return $title if $title;
