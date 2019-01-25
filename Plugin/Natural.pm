@@ -94,7 +94,8 @@ sub on_message {
 	}
 
 	my $response;
-	if ($what =~ /\b\Q$irc->nick_name()\E\b/) {
+	my $own_nick = $irc->nick_name();
+	if ($what =~ /\b\Q$own_nick\E\b/) {
 		return unless mention_odds();
 		$response = choose_mention_response($what, $nick);
 	} else {
