@@ -6,6 +6,7 @@ use warnings;
 my $root_config;
 my $config;
 my %current_alarm;
+my %lines_since;
 
 sub configure {
 	my $self = shift;
@@ -16,6 +17,7 @@ sub configure {
 
 	IdaliusConfig::assert_scalar($config, $self, "min_delay_sec");
 	IdaliusConfig::assert_scalar($config, $self, "max_delay_sec");
+	IdaliusConfig::assert_scalar($config, $self, "lines_break");
 
 	return $self;
 }
@@ -34,6 +36,9 @@ sub on_message {
 	return if ref($where) ne "ARRAY";
 	$where = $where->[0];
 
+	# Require some minimum number of lines in a channel before hmming again
+	return unless $lines_since{$where}++ >= $config->{lines_break};
+
 	if (defined $current_alarm{$where}) {
 		$irc->delay_remove($current_alarm{$where});
 	}
@@ -42,6 +47,8 @@ sub on_message {
 
 	$current_alarm{$where} = $irc->delay([privmsg => $where => $response],
 		$config->{min_delay_sec} + rand($config->{max_delay_sec} - $config->{min_delay_sec}));
+
+	$lines_since{$where} = 0;
 
 	return;
 }
