@@ -166,16 +166,17 @@ sub strike_add {
 	my $strike_count = 14;
 	my $strike_period = 45;
 
-	my ($nick, $channel) = @_;
+	my ($who, $channel) = @_;
+	my $nick = (split /!/, $who)[0];
 	my $now = time();
-	push @{$laststrike{$nick}}, $now;
-	if (@{$laststrike{$nick}} >= $strike_count) {
-		@{$laststrike{$nick}} = splice @{$laststrike{$nick}}, 1, $strike_count - 1;
-		my $first = @{$laststrike{$nick}}[0];
+	push @{$laststrike{$who}}, $now;
+	if (@{$laststrike{$who}} >= $strike_count) {
+		@{$laststrike{$who}} = splice @{$laststrike{$who}}, 1, $strike_count - 1;
+		my $first = @{$laststrike{$who}}[0];
 		if ($now - $first <= $strike_period) {
-			log_info "Ignoring $nick because of command flood";
+			log_info "Ignoring $who because of command flood";
 			$irc->yield(privmsg => $channel => "$nick: I'm ignoring you now, you've caused me to talk too much");
-			push @{$config->{_}->{ignore}}, $nick;
+			push @{$config->{_}->{ignore}}, $who;
 		}
 	}
 }
@@ -223,7 +224,7 @@ sub handle_common {
 	    ($config->{_}->{prefix} && $no_prefix_what =~ s/^\Q$config->{_}->{prefix}//))) {
 		$output = run_command($no_prefix_what, $who, $where, $ided, \@no_reenter);
 		$irc->yield(privmsg => $where => $output) if $output;
-		strike_add($nick, $channel) if $output;
+		strike_add($who, $channel) if $output;
 	}
 
 	# Secondly, trigger non-command handlers
@@ -245,7 +246,7 @@ sub trigger_modules {
 		my $output = $handler->(@base_args);
 		if ($output and $where) {
 			$irc->yield(privmsg => $where => $output);
-			strike_add($nick, $where->[0]);
+			strike_add($who, $where->[0]);
 		}
 	}
 	return;
