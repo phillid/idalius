@@ -19,21 +19,30 @@ sub convert {
 	my $from = (split / to /, $rest)[0];
 	my $to = (split / to /, $rest)[1];
 
-	return "Syntax: convert <from> to <to>\n" unless ($from and $to);
+	return "Syntax: convert <from> [to <to>]\n" unless ($from);
 
 	my ($out, $in);
-	my $pid = open2($out, $in, 'units', '-1', '--compact', '--quiet');
+	my $pid;
+	if ($to) {
+		$pid = open2($out, $in, 'units', '-1', '--compact', '--quiet', $from, $to);
+	} else {
+		$pid = open2($out, $in, 'units', '-1', '--compact', '--quiet', $from);
+	}
 
-	print $in "$from\n$to\n";
 	my $converted = <$out>;
 	chomp $converted;
 
 	close($in);
 	waitpid($pid, 0);
+
 	my $exit_status = $? >> 8;
 	# `units` doesn't actually seem to set this non-zero, but use it anyway
-	return "Conversion error" if $exit_status;
+	return "Error: $converted" if $exit_status;
 
-	return "Converted: $converted\n";
+	if ($to) {
+		return "Convert $from -> $to: $converted\n";
+	} else {
+		return "Define $from: $converted\n";
+	}
 }
 1;
