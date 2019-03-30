@@ -23,6 +23,7 @@ sub convert_common {
 		'-1',
 		'--compact',
 		'--quiet',
+		'--',
 		$from
 	);
 
