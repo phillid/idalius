@@ -54,6 +54,7 @@ sub convert {
 	return "Syntax: convert <from> [to <to>]\n" unless ($from);
 
 	my $converted = convert_common($from, $to);
+	return "Define $from: $converted\n" unless $to;
 	return "Convert $from -> $to: $converted\n";
 }
 
