@@ -52,20 +52,20 @@ sub convert {
 	my $from = (split / to /, $rest)[0];
 	my $to = (split / to /, $rest)[1];
 
-	return "Syntax: convert <from> [to <to>]\n" unless ($from);
+	return "Syntax: convert <from> [to <to>]" unless ($from);
 
 	my $converted = convert_common($from, $to);
-	return "Define $from: $converted\n" unless $to;
-	return "Convert $from -> $to: $converted\n";
+	return "Define $from: $converted" unless $to;
+	return "Convert $from -> $to: $converted";
 }
 
 sub define {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
-	return "Syntax: define [unit/expression]\n" unless ($rest);
+	return "Syntax: define [unit/expression]" unless ($rest);
 
 	my $defn = convert_common($rest, undef);
-	return "Define $rest: $defn\n";
+	return "Define $rest: $defn";
 }
 
 1;
