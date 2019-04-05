@@ -30,14 +30,23 @@ sub time {
 	return "Syntax: time [nick]" unless @arguments <= 1;
 
 	my $nick = $arguments[0] || $requester;
+
 	my ($case_nick) = grep {/^$nick$/i} @known_zones;
+	my $tz;
 	if ($case_nick) {
-		my $d = DateTime->now();
-		$d->set_time_zone($config->{timezone}->{$case_nick});
-		my $timestr = $d->strftime("%H:%M on %a %d %b, %Y (%Z)");
-		return "$nick\'s clock reads $timestr";
+		$tz = $config->{timezone}->{$case_nick};
 	} else {
-		return "$requester: I don't know what timezone $nick is in";
+		$tz = $nick;
+	}
+
+	eval {
+		my $d = DateTime->now();
+		$d->set_time_zone($tz);
+		my $timestr = $d->strftime("%H:%M on %a %d %b, %Y (%Z)");
+		return "$nick\'s clock reads $timestr" if $case_nick;
+		return "Clocks in $tz read $timestr";
+	} or do {
+		return "$requester: I'm unsure what the time is for $nick";
 	}
 }
 1;
