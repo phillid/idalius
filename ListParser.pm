@@ -1,10 +1,13 @@
 package ListParser;
 
+use strict;
+use warnings;
+
 sub parse_mapping {
 	my ($input) = @_;
-	my $key, $value;
+	my ($key, $value);
 	my $i = 0;
-	my $string_start, $string_end;
+	my ($string_start, $string_end);
 	$string_start = $string_end = undef;
 
 	# Are we currently lexing inside a string literal?
@@ -67,6 +70,7 @@ sub parse_list {
 	my $c_start = $is_hash ? "{" : "[";
 	my $c_end   = $is_hash ? "}" : "]";
 	my %h_res;
+	my %mapping;
 	my @a_res;
 	my $i = 0;
 
@@ -86,7 +90,10 @@ sub parse_list {
 	while ($nest != 0 && $i < length($input)) {
 		my $c = substr($input, $i, 1);
 
-		if ($c eq $c_start) {
+		if ($c eq "\\") {
+			substr($input, $i, 1) = "";
+			$i++;
+		} elsif ($c eq $c_start) {
 			$nest++;
 		} elsif ($c eq $c_end) {
 			$nest--;

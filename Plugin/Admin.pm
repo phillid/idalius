@@ -44,7 +44,6 @@ sub configure {
 	$cmdref->($self, "load", sub { $self->load_plugin(@_); } );
 	$cmdref->($self, "unload", sub { $self->unload_plugin(@_); } );
 
-
 	return $self;
 }
 
