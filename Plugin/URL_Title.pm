@@ -5,6 +5,7 @@ use warnings;
 use HTTP::Tiny;
 use HTML::Parser;
 use utf8;
+use Encode;
 
 use IdaliusConfig qw/assert_scalar/;
 
@@ -25,14 +26,22 @@ sub configure {
 }
 
 my $title;
+my $charset;
 
 sub start_handler
 {
-	return if shift ne "title";
+	my $tag = shift;
+	my $attr = shift;
 	my $self = shift;
-	$self->handler(text => sub { $title = shift; }, "dtext");
-	$self->handler(end  => sub { shift->eof if shift eq "title"; },
-	                    "tagname,self");
+	if ($tag eq "title") {
+		$self->handler(text => sub { $title = shift; }, "dtext");
+		$self->handler(end  => sub { shift->eof if shift eq "title"; },
+		                    "tagname,self");
+	} elsif ($tag eq "meta") {
+		if ($attr->{charset}) {
+			$charset = $attr->{charset};
+		}
+	}
 }
 
 sub get_title
@@ -70,14 +79,21 @@ sub get_title
 	}
 
 	my $html = $response->{content};
-	utf8::decode($html);
 
 	$title = "";
 	my $p = HTML::Parser->new(api_version => 3);
-	$p->handler( start => \&start_handler, "tagname,self");
+	$p->handler( start => \&start_handler, "tagname,attr,self" );
 	$p->parse($html);
 	return (undef, undef, "Error parsing HTML: $!") if $!;
 
+	if ($charset) {
+		my $dc = Encode::find_encoding($charset);
+		return (undef, undef, "Error: Unknown encoding $charset") unless $dc;
+		$title = $dc->decode($title);
+	} else {
+		# fall back on a guess of UTF-8 FIXME is this non-standard
+		utf8::decode($title);
+	}
 	$title =~ s/\s+/ /g;
 	$title =~ s/(^\s+|\s+$)//g;
 
