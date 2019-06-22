@@ -55,7 +55,18 @@ POE::Session->create(
 			_default
 			_start
 			irc_001
+			irc_002
+			irc_003
+			irc_004
+			irc_251
+			irc_252
+			irc_253
+			irc_254
+			irc_255
 			irc_302
+			irc_372
+			irc_375
+			irc_376
 			irc_kick
 			irc_ctcp_action
 			irc_public
@@ -315,12 +326,114 @@ sub irc_001 {
 	my ($poek, $server, $message) = @_[KERNEL, ARG0, ARG1];
 	my @empty = ();
 
-	trigger_modules("001", undef, undef, \@empty, ($server, $message));
+	trigger_modules("welcome", undef, undef, \@empty, ($server, $message));
 
 	# FIXME move to forward ping module
 	$poek->delay(custom_ping => $ping_delay);
 	return;
 }
+
+# 002 (your host)
+sub irc_002 {
+	my $message = $_[ARG1];
+	my @empty = ();
+
+	trigger_modules("your_host", undef, undef, \@empty, ($message));
+	return;
+}
+
+# 003 (created)
+sub irc_003 {
+	my $message = $_[ARG1];
+	my @empty = ();
+
+	trigger_modules("created", undef, undef, \@empty, ($message));
+	return;
+}
+
+# 004 (myinfo)
+sub irc_004 {
+	my $message = $_[ARG1];
+	my @empty = ();
+
+	trigger_modules("my_info", undef, undef, \@empty, ($message));
+	return;
+}
+
+# 251 (luserclient)
+sub irc_251 {
+	my $message = $_[ARG1];
+	my @empty = ();
+
+	trigger_modules("251_user_client", undef, undef, \@empty, ($message));
+	return;
+}
+
+# 252 (luserop)
+sub irc_252 {
+	my ($count, $message) = @{$_[ARG2]};
+	my @empty = ();
+
+	trigger_modules("252_user_op", undef, undef, \@empty, ($count, $message));
+	return;
+}
+
+# 253 (luserunknown)
+sub irc_253 {
+	my ($count, $message) = @{$_[ARG2]};
+	my @empty = ();
+
+	trigger_modules("253_user_unknown", undef, undef, \@empty, ($count, $message));
+	return;
+}
+
+# 254 (luserchannels)
+sub irc_254 {
+	my ($count, $message) = @{$_[ARG2]};
+	my @empty = ();
+
+	trigger_modules("254_user_channels", undef, undef, \@empty, ($count, $message));
+	return;
+}
+
+# 255 (luserme)
+sub irc_255 {
+	my ($message) = $_[ARG1];
+	my @empty = ();
+
+	trigger_modules("255_user_me", undef, undef, \@empty, ($message));
+	return;
+}
+
+
+
+# 372 (MOTD content)
+sub irc_372 {
+	my ($server, $motd) = @_[ARG0..ARG1];
+	my @empty = ();
+
+	trigger_modules("motd_content", undef, undef, \@empty, ($server, $motd));
+	return;
+}
+
+# 375 (MOTD begin)
+sub irc_375 {
+	my ($server, $message) = @_[ARG0..ARG1];
+	my @empty = ();
+
+	trigger_modules("motd_begin", undef, undef, \@empty, ($server, $message));
+	return;
+}
+
+# 376 (MOTD end)
+sub irc_376 {
+	my ($server, $message) = @_[ARG0..ARG1];
+	my @empty = ();
+
+	trigger_modules("motd_end", undef, undef, \@empty, ($server, $message));
+	return;
+}
+
 
 sub irc_ctcp_action {
 	my ($sender, $who, $where, $what) = @_[SENDER, ARG0 .. ARG2];
