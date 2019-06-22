@@ -14,6 +14,7 @@ my %t = (
 	nick => color("cyan"),
 	info => color("yellow"),
 	kick => color("red"),
+	host => color("magenta"),
 	channel => color("blue"),
 	message => color("reset"),
 	misc => color("bright_black"),
@@ -33,7 +34,7 @@ sub configure {
 # FIXME Not triggered yet
 sub on_001 {
 	my ($self, $logger, $server, $message, $irc) = @_;
-	$logger->("$t{info}Connected to ${host}$server$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
+	$logger->("$t{info}Connected to $t{host}$server$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
 }
 
 sub on_message {

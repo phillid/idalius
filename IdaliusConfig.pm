@@ -48,7 +48,7 @@ sub check_config
 
 	# Lists of mandatory config variables 
 	my @scalars = qw/nick username ircname server port usessl sslcert sslkey user group prefix_nick prefix log_debug/;
-	my @lists   = qw/plugins channels ignore/;
+	my @lists   = qw/plugins ignore/;
 
 	foreach my $name (@scalars) {
 		assert_scalar($config->{_}, "_", $name);

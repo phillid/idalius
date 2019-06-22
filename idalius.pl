@@ -312,13 +312,13 @@ sub _start {
 }
 
 sub irc_001 {
-	my ($irc, $sender) = @_[KERNEL, SENDER];
-	my $heap = $sender->get_heap();
+	my ($poek, $server, $message) = @_[KERNEL, ARG0, ARG1];
+	my @empty = ();
 
-	log_info("Connected to server ", $heap->server_name());
+	trigger_modules("001", undef, undef, \@empty, ($server, $message));
 
-	$heap->yield(join => $_) for @{$config->{_}->{channels}};
-	$irc->delay(custom_ping => $ping_delay);
+	# FIXME move to forward ping module
+	$poek->delay(custom_ping => $ping_delay);
 	return;
 }
 
