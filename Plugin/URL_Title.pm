@@ -86,7 +86,7 @@ sub get_title
 	$p->parse($html);
 	return (undef, undef, "Error parsing HTML: $!") if $!;
 
-	if ($charset) {
+	if ($charset and $charset ne "utf-8") {
 		my $dc = Encode::find_encoding($charset);
 		return (undef, undef, "Error: Unknown encoding $charset") unless $dc;
 		$title = $dc->decode($title);
