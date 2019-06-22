@@ -55,6 +55,7 @@ POE::Session->create(
 			_default
 			_start
 			irc_001
+			irc_302
 			irc_kick
 			irc_ctcp_action
 			irc_public
@@ -145,13 +146,32 @@ sub run_command {
 		@arguments);
 }
 
-# Send an effect-free client->server message as a form of ping to allegedly
-# help POE realise when a connection is down. It otherwise seems to not realise
-# a connection has fallen over otherwise.
+my $watchdog_alarm;
+# Handler for userhost response. We use userhost requests as a crude form
+# of backwards ping/keepalive
+sub irc_302 {
+	my ($poek) = @_;
+	# Cancel the watchdog fail timer
+	$poek->delay_remove($watchdog_alarm) if $watchdog_alarm;
+	log_info "Watchdog received pat";
+}
+
+sub ping_fail {
+	log_info "Error: heartbeat failed to pat watchdog. Exiting";
+	exit(1);
+}
+
+# Send a harmless client->server message as a form of heartbeat to allegedly
+# help POE realise when a connection is down. It seems not to realise a
+# connection has fallen over otherwise.
 sub custom_ping {
 	my ($poek) = $_[KERNEL];
+	# Send a ping and schedule the next one
 	$irc->yield(userhost => $irc->nick_name());
 	$poek->delay(custom_ping => $ping_delay);
+
+	# Set a watchdog for twice the ping interval
+	$watchdog_alarm = $poek->delay(ping_fail => 2 * $ping_delay);
 }
 
 sub drop_priv {
