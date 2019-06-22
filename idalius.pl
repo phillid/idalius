@@ -59,6 +59,8 @@ POE::Session->create(
 			irc_kick
 			irc_ctcp_action
 			irc_public
+			irc_topic
+			irc_ping
 			irc_msg
 			irc_join
 			irc_part
@@ -203,6 +205,10 @@ sub strike_add {
 
 sub should_ignore {
 	my ($who) = @_;
+
+	# Short circuit on non-user messages (undef is used for server msgs)
+	return unless $who;
+
 	for my $mask (@{$config->{_}->{ignore}}) {
 		my $expr = $mask;
 		$expr =~ s/([^[:alnum:]\*])/$1/g;
@@ -257,7 +263,6 @@ sub handle_common {
 # a given message type, passing them only the given arguments
 sub trigger_modules {
 	my ($message_type, $who, $where, $no_reenter, @arguments) = @_;
-	my $nick = (split /!/, $who)[0];
 
 	for my $handler (handlers_for($message_type, $who, $no_reenter)) {
 		my @base_args = (\&log_info);
@@ -277,7 +282,6 @@ sub trigger_modules {
 sub handlers_for {
 	my ($message_type, $who, $no_reenter) = @_;
 	my @handlers = ();
-	my $nick = (split /!/, $who)[0];
 
 	$message_type = "on_$message_type";
 	for my $module (@{$config->{_}->{active_plugins}}) {
@@ -369,6 +373,7 @@ sub irc_nick {
 sub irc_invite {
 	my ($who, $where) = @_[ARG0 .. ARG1];
 	my @empty = ();
+
 	trigger_modules("invite", $who, undef, \@empty, ($who, $where));
 	return;
 }
@@ -385,9 +390,24 @@ sub irc_invite {
 # irc_notice
 # irc_quit
 # irc_socketerr
-# irc_topic
 # irc_whois
 # irc_whowas
+
+sub irc_topic {
+	my ($who, $where, $topic) = @_[ARG0 .. ARG2];
+	my @empty = ();
+
+	trigger_modules("topic", $who, undef, \@empty, ($who, $where, $topic));
+	return;
+}
+
+sub irc_ping {
+	my $server = $_[ARG0];
+	my @empty = ();
+
+	trigger_modules("ping", undef, undef, \@empty, ($server));
+	return;
+}
 
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
