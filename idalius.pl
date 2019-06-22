@@ -150,7 +150,7 @@ sub run_command {
 # a connection has fallen over otherwise.
 sub custom_ping {
 	my ($poek) = $_[KERNEL];
-	$poek->yield(userhost => $irc->nick_name());
+	$irc->yield(userhost => $irc->nick_name());
 	$poek->delay(custom_ping => $ping_delay);
 }
 
