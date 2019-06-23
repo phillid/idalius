@@ -17,6 +17,7 @@ my %t = (
 	host => color("magenta"),
 	channel => color("blue"),
 	message => color("reset"),
+	private => color("magenta"),
 	misc => color("bright_black"),
 	reset => color("reset")
 );
@@ -89,6 +90,12 @@ sub on_255_user_me {
 sub on_message {
 	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
 	$logger->("$t{bracket}\[$t{channel}$where->[0]$t{bracket}\] $t{nick}$who: $t{message}$what$t{reset}");
+	return;
+}
+
+sub on_privmsg {
+	my ($self, $logger, $who, $to, $raw_what, $what, $irc) = @_;
+	$logger->("$t{bracket}\[$t{channel}private$t{bracket}\] $t{nick}$who$t{bracket}: $t{private}$what$t{reset}");
 	return;
 }
 

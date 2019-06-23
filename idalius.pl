@@ -525,13 +525,13 @@ sub irc_ping {
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
-
-	# FIXME trigger plugins with on_msg or something. Currently no privmsg
-	# are logged, but Log.pm can do this for us.
+	my @empty = ();
 
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $output = run_command($stripped_what, $who, $nick, $ided);
 	$irc->yield(privmsg => $nick => $output) if $output;
+
+	trigger_modules("privmsg", $who, undef, \@empty, ($who, $to, $what, $stripped_what));
 
 	return;
 }
