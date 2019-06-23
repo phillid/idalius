@@ -325,9 +325,7 @@ sub _start {
 
 sub irc_001 {
 	my ($poek, $server, $message) = @_[KERNEL, ARG0, ARG1];
-	my @empty = ();
-
-	trigger_modules("001_welcome", undef, undef, \@empty, ($server, $message));
+	trigger_modules("001_welcome", undef, undef, [], ($server, $message));
 
 	# FIXME move to forward ping module
 	$poek->delay(custom_ping => $ping_delay);
@@ -337,72 +335,56 @@ sub irc_001 {
 # 002 (your host)
 sub irc_002 {
 	my $message = $_[ARG1];
-	my @empty = ();
-
-	trigger_modules("002_your_host", undef, undef, \@empty, ($message));
+	trigger_modules("002_your_host", undef, undef, [], ($message));
 	return;
 }
 
 # 003 (created)
 sub irc_003 {
 	my $message = $_[ARG1];
-	my @empty = ();
-
-	trigger_modules("003_created", undef, undef, \@empty, ($message));
+	trigger_modules("003_created", undef, undef, [], ($message));
 	return;
 }
 
 # 004 (myinfo)
 sub irc_004 {
 	my $message = $_[ARG1];
-	my @empty = ();
-
-	trigger_modules("004_my_info", undef, undef, \@empty, ($message));
+	trigger_modules("004_my_info", undef, undef, [], ($message));
 	return;
 }
 
 # 251 (luserclient)
 sub irc_251 {
 	my $message = $_[ARG1];
-	my @empty = ();
-
-	trigger_modules("251_user_client", undef, undef, \@empty, ($message));
+	trigger_modules("251_user_client", undef, undef, [], ($message));
 	return;
 }
 
 # 252 (luserop)
 sub irc_252 {
 	my ($count, $message) = @{$_[ARG2]};
-	my @empty = ();
-
-	trigger_modules("252_user_op", undef, undef, \@empty, ($count, $message));
+	trigger_modules("252_user_op", undef, undef, [], ($count, $message));
 	return;
 }
 
 # 253 (luserunknown)
 sub irc_253 {
 	my ($count, $message) = @{$_[ARG2]};
-	my @empty = ();
-
-	trigger_modules("253_user_unknown", undef, undef, \@empty, ($count, $message));
+	trigger_modules("253_user_unknown", undef, undef, [], ($count, $message));
 	return;
 }
 
 # 254 (luserchannels)
 sub irc_254 {
 	my ($count, $message) = @{$_[ARG2]};
-	my @empty = ();
-
-	trigger_modules("254_user_channels", undef, undef, \@empty, ($count, $message));
+	trigger_modules("254_user_channels", undef, undef, [], ($count, $message));
 	return;
 }
 
 # 255 (luserme)
 sub irc_255 {
 	my ($message) = $_[ARG1];
-	my @empty = ();
-
-	trigger_modules("255_user_me", undef, undef, \@empty, ($message));
+	trigger_modules("255_user_me", undef, undef, [], ($message));
 	return;
 }
 
@@ -411,27 +393,21 @@ sub irc_255 {
 # 372 (MOTD content)
 sub irc_372 {
 	my ($server, $motd) = @_[ARG0..ARG1];
-	my @empty = ();
-
-	trigger_modules("372_motd_content", undef, undef, \@empty, ($server, $motd));
+	trigger_modules("372_motd_content", undef, undef, [], ($server, $motd));
 	return;
 }
 
 # 375 (MOTD begin)
 sub irc_375 {
 	my ($server, $message) = @_[ARG0..ARG1];
-	my @empty = ();
-
-	trigger_modules("375_motd_begin", undef, undef, \@empty, ($server, $message));
+	trigger_modules("375_motd_begin", undef, undef, [], ($server, $message));
 	return;
 }
 
 # 376 (MOTD end)
 sub irc_376 {
 	my ($server, $message) = @_[ARG0..ARG1];
-	my @empty = ();
-
-	trigger_modules("376_motd_end", undef, undef, \@empty, ($server, $message));
+	trigger_modules("376_motd_end", undef, undef, [], ($server, $message));
 	return;
 }
 
@@ -455,40 +431,34 @@ sub irc_public {
 
 sub irc_join {
 	my ($who, $channel) = @_[ARG0 .. ARG1];
-	my @empty = ();
-	trigger_modules("join", $who, $channel, \@empty, ($who, $channel));
+	trigger_modules("join", $who, $channel, [], ($who, $channel));
 	return;
 }
 
 sub irc_part {
 	my ($who, $channel, $why) = @_[ARG0 .. ARG2];
 	my $nick = ( split /!/, $who )[0];
-	my @empty = ();
 	my @where = ($channel);
 
-	trigger_modules("part", $who, $channel, \@empty, ($who, $channel, $why));
+	trigger_modules("part", $who, $channel, [], ($who, $channel, $why));
 	return;
 }
 
 sub irc_kick {
 	my ($kicker, $channel, $kickee, $reason) = @_[ARG0 .. ARG3];
-	my @empty = ();
-	trigger_modules("kick", $kicker, $channel, \@empty, ($kicker, $channel, $kickee, $reason));
+	trigger_modules("kick", $kicker, $channel, [], ($kicker, $channel, $kickee, $reason));
 	return;
 }
 
 sub irc_nick {
 	my ($who, $new_nick) = @_[ARG0 .. ARG1];
-	my @empty = ();
-	trigger_modules("nick", $who, undef, \@empty, ($who, $new_nick));
+	trigger_modules("nick", $who, undef, [], ($who, $new_nick));
 	return;
 }
 
 sub irc_invite {
 	my ($who, $where) = @_[ARG0 .. ARG1];
-	my @empty = ();
-
-	trigger_modules("invite", $who, undef, \@empty, ($who, $where));
+	trigger_modules("invite", $who, undef, [], ($who, $where));
 	return;
 }
 
@@ -508,38 +478,30 @@ sub irc_invite {
 
 sub irc_notice {
 	my ($who, $where, $message) = @_[ARG0 .. ARG2];
-	my @empty = ();
-
-	trigger_modules("notice", $who, $where, \@empty, ($who, $where->[0], $message));
+	trigger_modules("notice", $who, $where, [], ($who, $where->[0], $message));
 	return;
 }
 
 sub irc_topic {
 	my ($who, $where, $topic) = @_[ARG0 .. ARG2];
-	my @empty = ();
-
-	trigger_modules("topic", $who, undef, \@empty, ($who, $where, $topic));
+	trigger_modules("topic", $who, undef, [], ($who, $where, $topic));
 	return;
 }
 
 sub irc_ping {
 	my $server = $_[ARG0];
-	my @empty = ();
-
-	trigger_modules("ping", undef, undef, \@empty, ($server));
+	trigger_modules("ping", undef, undef, [], ($server));
 	return;
 }
 
 sub irc_msg {
 	my ($who, $to, $what, $ided) = @_[ARG0 .. ARG3];
 	my $nick = (split /!/, $who)[0];
-	my @empty = ();
-
 	my $stripped_what = strip_color(strip_formatting($what));
 	my $output = run_command($stripped_what, $who, $nick, $ided);
 	$irc->yield(privmsg => $nick => $output) if $output;
 
-	trigger_modules("privmsg", $who, undef, \@empty, ($who, $to, $what, $stripped_what));
+	trigger_modules("privmsg", $who, undef, [], ($who, $to, $what, $stripped_what));
 
 	return;
 }
