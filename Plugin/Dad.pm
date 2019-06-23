@@ -35,7 +35,7 @@ sub on_message {
 	$what = Encode::decode('utf8', $what);
 
 	print "$what\n";
-	if ($what =~ /^i('\''|\s+a)m\s+(\w+)\s*$/) {
+	if ($what =~ /^i('|\s+a)m\s+(\w+)\s*$/) {
 		return "Hi ".$2.", I'm dad";
 	}
 	return;
