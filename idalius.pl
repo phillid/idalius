@@ -70,6 +70,7 @@ POE::Session->create(
 			irc_kick
 			irc_ctcp_action
 			irc_public
+			irc_notice
 			irc_topic
 			irc_ping
 			irc_msg
@@ -500,11 +501,18 @@ sub irc_invite {
 # irc_disconnected
 # irc_error
 # irc_mode
-# irc_notice
 # irc_quit
 # irc_socketerr
 # irc_whois
 # irc_whowas
+
+sub irc_notice {
+	my ($who, $where, $message) = @_[ARG0 .. ARG2];
+	my @empty = ();
+
+	trigger_modules("notice", $who, $where, \@empty, ($who, $where->[0], $message));
+	return;
+}
 
 sub irc_topic {
 	my ($who, $where, $topic) = @_[ARG0 .. ARG2];

@@ -134,6 +134,12 @@ sub on_invite {
 	return;
 }
 
+sub on_notice {
+	my ($self, $logger, $who, $where, $message, $irc) = @_;
+	$logger->("$t{bracket}\[$t{channel}$where$t{bracket}\]$t{info} --- Notice: $t{nick}$who$t{info}: $t{message}$message$t{reset}");
+	return;
+}
+
 sub on_topic {
 	my ($self, $logger, $who, $where, $topic, $irc) = @_;
 	if ($topic) {
