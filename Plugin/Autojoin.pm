@@ -15,7 +15,7 @@ sub configure {
 	return $self;
 }
 
-sub on_welcome {
+sub on_001_welcome {
 	my ($self, $logger, $server, $message, $irc) = @_;
 	$irc->yield(join => $_) for @{$config->{channels}};
 	return;

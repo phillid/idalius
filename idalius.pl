@@ -326,7 +326,7 @@ sub irc_001 {
 	my ($poek, $server, $message) = @_[KERNEL, ARG0, ARG1];
 	my @empty = ();
 
-	trigger_modules("welcome", undef, undef, \@empty, ($server, $message));
+	trigger_modules("001_welcome", undef, undef, \@empty, ($server, $message));
 
 	# FIXME move to forward ping module
 	$poek->delay(custom_ping => $ping_delay);
@@ -338,7 +338,7 @@ sub irc_002 {
 	my $message = $_[ARG1];
 	my @empty = ();
 
-	trigger_modules("your_host", undef, undef, \@empty, ($message));
+	trigger_modules("002_your_host", undef, undef, \@empty, ($message));
 	return;
 }
 
@@ -347,7 +347,7 @@ sub irc_003 {
 	my $message = $_[ARG1];
 	my @empty = ();
 
-	trigger_modules("created", undef, undef, \@empty, ($message));
+	trigger_modules("003_created", undef, undef, \@empty, ($message));
 	return;
 }
 
@@ -356,7 +356,7 @@ sub irc_004 {
 	my $message = $_[ARG1];
 	my @empty = ();
 
-	trigger_modules("my_info", undef, undef, \@empty, ($message));
+	trigger_modules("004_my_info", undef, undef, \@empty, ($message));
 	return;
 }
 
@@ -412,7 +412,7 @@ sub irc_372 {
 	my ($server, $motd) = @_[ARG0..ARG1];
 	my @empty = ();
 
-	trigger_modules("motd_content", undef, undef, \@empty, ($server, $motd));
+	trigger_modules("372_motd_content", undef, undef, \@empty, ($server, $motd));
 	return;
 }
 
@@ -421,7 +421,7 @@ sub irc_375 {
 	my ($server, $message) = @_[ARG0..ARG1];
 	my @empty = ();
 
-	trigger_modules("motd_begin", undef, undef, \@empty, ($server, $message));
+	trigger_modules("375_motd_begin", undef, undef, \@empty, ($server, $message));
 	return;
 }
 
@@ -430,7 +430,7 @@ sub irc_376 {
 	my ($server, $message) = @_[ARG0..ARG1];
 	my @empty = ();
 
-	trigger_modules("motd_end", undef, undef, \@empty, ($server, $message));
+	trigger_modules("376_motd_end", undef, undef, \@empty, ($server, $message));
 	return;
 }
 

@@ -33,25 +33,25 @@ sub configure {
 }
 
 # IRC 001
-sub on_welcome {
+sub on_001_welcome {
 	my ($self, $logger, $server, $message, $irc) = @_;
 	$logger->("$t{info}Connected to $t{host}$server$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
 }
 
 # IRC 002
-sub on_your_host {
+sub on_002_your_host {
 	my ($self, $logger, $message, $irc) = @_;
 	$logger->("$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
 }
 
 # IRC 003
-sub on_created {
+sub on_003_created {
 	my ($self, $logger, $message, $irc) = @_;
 	$logger->("$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
 }
 
 # IRC 004
-sub on_my_info {
+sub on_004_my_info {
 	my ($self, $logger, $message, $irc) = @_;
 	$logger->("$t{info} --- \"$t{message}$message$t{info}\"$t{reset}");
 }
@@ -85,7 +85,6 @@ sub on_255_user_me {
 	my ($self, $logger, $message, $irc) = @_;
 	$logger->("$t{info}Online: \"$t{message}$message$t{info}\"$t{reset}");
 }
-
 
 sub on_message {
 	my ($self, $logger, $who, $where, $raw_what, $what, $irc) = @_;
@@ -151,22 +150,21 @@ sub on_ping {
 	return;
 }
 
-sub on_motd_content {
+sub on_372_motd_content {
 	my ($self, $logger, $server, $motd, $irc) = @_;
 	$logger->("$t{info}MOTD: $t{message}$motd$t{reset}");
 	return;
 }
 
-sub on_motd_begin {
+sub on_375_motd_begin {
 	my ($self, $logger, $server, $message, $irc) = @_;
 	$logger->("$t{info}$message$t{reset}");
 	return;
 }
 
-sub on_motd_end {
+sub on_376_motd_end {
 	my ($self, $logger, $server, $message, $irc) = @_;
 	$logger->("$t{info}$message$t{reset}");
 	return;
 }
-
 1;
