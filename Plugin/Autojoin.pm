@@ -20,4 +20,20 @@ sub on_001_welcome {
 	$irc->yield(join => $_) for @{$config->{channels}};
 	return;
 }
+
+sub on_kick {
+	my ($self, $logger, $kicker, $where, $kickee, $why, $irc) = @_;
+	if ($kickee eq $irc->nick_name) {
+		$logger->("I was kicked from $where. Rejoining now...");
+		$irc->yield(join => $where);
+	}
+	return;
+}
+
+sub on_invite {
+	my ($self, $logger, $who, $where, $irc) = @_;
+
+	$irc->yield(join => $where) if (grep {$_ eq $where} @{$config->{channels}});
+	return;
+}
 1;
