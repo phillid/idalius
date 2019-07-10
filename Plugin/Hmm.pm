@@ -43,7 +43,7 @@ sub on_message {
 		$irc->delay_remove($current_alarm{$where});
 	}
 
-	my $response = some("Hmm", "hmm", "hmmmmmm", "oof", "mmm");
+	my $response = some("Hmm", "hmm", "hmmmmmm", "oof", "mmm", "Hi Animatronio!");
 
 	$current_alarm{$where} = $irc->delay([privmsg => $where => $response],
 		$config->{min_delay_sec} + rand($config->{max_delay_sec} - $config->{min_delay_sec}));
