@@ -28,7 +28,7 @@ sub configure {
 	$cmdref->($self, "part", sub { $self->part(@_); } );
 	$cmdref->($self, "mode", sub { $self->mode(@_); } );
 	$cmdref->($self, "kick", sub { $self->kick(@_); } );
-	$cmdref->($self, "topic", sub { $self->topic(@_); } );
+	$cmdref->($self, "set topic", sub { $self->topic(@_); } );
 	$cmdref->($self, "reconnect", sub { $self->reconnect(@_); } );
 
 	$cmdref->($self, "ignore", sub { $self->ignore(@_); } );
@@ -168,7 +168,7 @@ sub topic {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
-	return "Syntax: topic <new topic>" unless @arguments >= 2;
+	return "Syntax: set topic <new topic>" unless @arguments >= 2;
 
 	# Strip nick/channel from message
 	$rest =~ s/^(.*?\s)//;

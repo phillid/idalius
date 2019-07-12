@@ -64,6 +64,8 @@ POE::Session->create(
 			irc_254
 			irc_255
 			irc_302
+			irc_331
+			irc_332
 			irc_372
 			irc_375
 			irc_376
@@ -388,7 +390,21 @@ sub irc_255 {
 	return;
 }
 
+# 331 (rpl_notopic)
+# Sent in response to topic query
+sub irc_331 {
+	my ($where) = $_[ARG1];
+	trigger_modules("331_rpl_notopic", undef, $where, [], ($where));
+	return;
+}
 
+# 332 (rpl_topic)
+# Sent in response to topic query
+sub irc_332 {
+	my ($where, $topic) = @{$_[ARG2]};
+	trigger_modules("332_rpl_topic", undef, undef, [], ($where, $topic));
+	return;
+}
 
 # 372 (MOTD content)
 sub irc_372 {

@@ -156,6 +156,18 @@ sub on_ping {
 	return;
 }
 
+sub on_331_rpl_notopic {
+	my ($self, $logger, $where, $irc) = @_;
+	$logger->("$t{bracket}\[$t{channel}$where$t{bracket}\]$t{info} --- topic is not set$t{reset}");
+	return;
+}
+
+sub on_332_rpl_topic {
+	my ($self, $logger, $where, $topic, $irc) = @_;
+	$logger->("$t{bracket}\[$t{channel}$where$t{bracket}\]$t{info} --- topic is $t{message}$topic$t{reset}");
+	return;
+}
+
 sub on_372_motd_content {
 	my ($self, $logger, $server, $motd, $irc) = @_;
 	$logger->("$t{info}MOTD: $t{message}$motd$t{reset}");
