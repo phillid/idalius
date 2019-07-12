@@ -168,13 +168,19 @@ sub topic {
 	my ($self, $irc, $logger, $who, $where, $ided, $rest, $no_reenter, @arguments) = @_;
 
 	return unless is_admin($logger, $who, $ided);
-	return "Syntax: set topic <new topic>" unless @arguments >= 2;
 
-	# Strip nick/channel from message
-	$rest =~ s/^(.*?\s)//;
+	$where = $where->[0] if ref($where) eq "ARRAY";
+	my $channel;
+	if (@arguments && $arguments[0] =~ m/^#/) {
+		$channel = $arguments[0];
+		$rest =~ s/^.*?(\s|$)//;
+	} elsif ($where =~ m/^#/) {
+		$channel = $where;
+	}
 
-	# FIXME use $where if it's a channel
-	$irc->yield(topic => $arguments[0] => $rest);
+	return "Syntax: set topic <new topic>" unless $channel;
+
+	$irc->yield(topic => $channel => $rest);
 }
 
 sub reconnect {
