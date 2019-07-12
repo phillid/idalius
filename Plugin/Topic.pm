@@ -23,7 +23,7 @@ sub topic {
 	my $channel = @arguments ? $arguments[0] : $where;
 	return "Syntax: topic [channel]" unless $channel =~ m/^#.*$/;
 
-	my $topic = $channel_topics{$channel} || "(no topic)";
+	my $topic = $channel_topics{$channel} || "(unknown)";
 	return "Topic for $channel: $topic";
 }
 
