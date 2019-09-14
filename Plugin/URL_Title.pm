@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use HTTP::Tiny;
 use HTML::Parser;
+use HTML::Entities;
 use utf8;
 use Encode;
 
@@ -25,8 +26,9 @@ sub configure {
 	return $self;
 }
 
+# Globals set by HTML parser, used by get_title
 my $title;
-my $charset;
+my $charset = "utf8"; # charset default to utf8, if not specified in HTML
 
 sub start_handler
 {
@@ -34,7 +36,8 @@ sub start_handler
 	my $attr = shift;
 	my $self = shift;
 	if ($tag eq "title") {
-		$self->handler(text => sub { $title = shift; }, "dtext");
+		# Note: NOT dtext. leave entities until after decoding text. See comment below
+		$self->handler(text => sub { $title = shift; }, "text");
 		$self->handler(end  => sub { shift->eof if shift eq "title"; },
 		                    "tagname,self");
 	} elsif ($tag eq "meta") {
@@ -86,18 +89,21 @@ sub get_title
 	$p->parse($html);
 	return (undef, undef, "Error parsing HTML: $!") if $!;
 
-	if ($charset and lc($charset) ne "utf-8") {
-		my $dc = Encode::find_encoding($charset);
-		return (undef, undef, "Error: Unknown encoding $charset") unless $dc;
-		$title = $dc->decode($title);
-	} else {
-		# fall back on a guess of UTF-8 FIXME is this non-standard
-		utf8::decode($title);
-	}
+	# Decode raw bytes from document's title
+	my $dc = Encode::find_encoding($charset);
+	return (undef, undef, "Error: Unknown encoding $charset") unless $dc;
+	$title = $dc->decode($title);
+
+	# Finally, collapse entities into the characters they represent. Note this
+	# must be done instead of pulling dtext from the HTML parser, else you can
+	# end up with a bad mix of encodings (see documents with wchars mixed with
+	# entities representing more wchars in titles)
+	decode_entities($title);
+
+	# Normalise and trim whitespace for tidiness
 	$title =~ s/\s+/ /g;
 	$title =~ s/(^\s+|\s+$)//g;
 
-	utf8::upgrade($title);
 	return (undef, undef, "Error: No title") unless $title;
 
 	my $shorturl = $url;
