@@ -28,7 +28,8 @@ sub configure {
 
 # Globals set by HTML parser, used by get_title
 my $title;
-my $charset = "utf8"; # charset default to utf8, if not specified in HTML
+my $charset;
+my $content_type; # Content-Type header, picked from HTTP or http-equiv
 
 sub start_handler
 {
@@ -43,6 +44,10 @@ sub start_handler
 	} elsif ($tag eq "meta") {
 		if ($attr->{charset}) {
 			$charset = $attr->{charset};
+		} elsif (   $attr->{"http-equiv"}
+			     && lc($attr->{"http-equiv"}) eq "content-type"
+			     && $attr->{content}) {
+			$content_type = $attr->{"content"};
 		}
 	}
 }
@@ -88,6 +93,20 @@ sub get_title
 	$p->handler( start => \&start_handler, "tagname,attr,self" );
 	$p->parse($html);
 	return (undef, undef, "Error parsing HTML: $!") if $!;
+
+	# Pick out charset from the following in order of precedence:
+	# 1. <meta charset="…"> (stored in $charset already, if present)
+	# 2. <meta http-equiv="Content-Type">
+	# 3. Content-Type HTTP header
+	# 4. Default to "utf8"
+	if (!$charset) {
+		$content_type //= $response->{headers}->{"content-type"};
+		if ($content_type =~ m/;\s*charset=(\S+)/) {
+			$charset = $1;
+		} else {
+			$charset = "utf8";
+		}
+	}
 
 	# Decode raw bytes from document's title
 	my $dc = Encode::find_encoding($charset);
