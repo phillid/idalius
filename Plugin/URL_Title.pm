@@ -88,7 +88,9 @@ sub get_title
 
 	my $html = $response->{content};
 
-	$title = "";
+	$charset = undef;
+	$content_type = undef;
+	$title = undef;
 	my $p = HTML::Parser->new(api_version => 3);
 	$p->handler( start => \&start_handler, "tagname,attr,self" );
 	$p->parse($html);
