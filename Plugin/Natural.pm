@@ -44,7 +44,7 @@ sub choose_mention_response {
 		return some("hi $nick", "hey $nick", "sup $nick") . some("", ", how goes it?");
 	} elsif ($what =~ /\b(thanks|thx|ta)\b/i) {
 		return some("don't mention it", "that's ok", ":)", "not a problem");
-	} elsif ($what =~ /\b(shush|(shit|shut)(\s+the\s+fuck|)\s+up|stfu)\b/i) {
+	} elsif ($what =~ /\b(shush|(shit|shut)(\s+the\s+fuck|)\s+(up|it)|stfu)\b/i) {
 		return some("$nick: shush yourself", "shut up, $nick", "nou $nick", "sorry $nick", ":(");
 	} elsif ($what =~ /\b(fuck\s+(off?|you|u)|fucking)\b/i) {
 		return some("$nick: take your meds", "stop harassing me", "ease up on the drink, mate", "ooh big boy angry $nick has come out to play");
