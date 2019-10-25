@@ -84,6 +84,7 @@ sub do_markov
 		$word = some(@{$markov_data{$word}});
 	} until(not $word or $word eq "" or $i == 1000);
 
+	return if scalar(split / /, $message) <= 2;
 	return $message;
 }
 
@@ -93,7 +94,6 @@ sub markov_cmd
 
 	my $seed = $arguments[0];
 	return do_markov($seed);
-	return "foo";
 }
 
 sub on_message
