@@ -74,18 +74,24 @@ sub some
 
 sub do_markov
 {
-	my $word = $_[0];
-	$word = some(keys %markov_data) unless $word;
-	my $message = "";
-	my $i = 0;
-	do {
-		$i++;
-		$message .= "$word ";
-		$word = some(@{$markov_data{$word}});
-	} until(not $word or $word eq "" or $i == 1000);
+	my $tries = 0;
 
-	return if scalar(split / /, $message) <= 2;
-	return $message;
+	while ($tries++ < 10) {
+		my $word = $_[0];
+		$word = some(keys %markov_data) unless $word;
+		my $message = "";
+		my $i = 0;
+		do {
+			$i++;
+			$message .= "$word ";
+			$word = some(@{$markov_data{$word}});
+		} until(not $word or $word eq "" or $i == 1000);
+
+		return $message if scalar(split / /, $message) > 2;
+	}
+
+	# fallthrough: didn't form a long enough message in enough tries
+	return;
 }
 
 sub markov_cmd
